@@ -1,6 +1,8 @@
 import { User } from '../../models/User';
 import jwt from 'jsonwebtoken';
 import { GraphQLError } from 'graphql';
+import bcrypt from 'bcryptjs';
+import { validateLoginInput, validateRegisterInput } from '../../utils/AuthValidator';
 
 const generateToken = (user) => {
     return jwt.sign(
@@ -16,12 +18,72 @@ const generateToken = (user) => {
 export const UserResolver = {
     Mutation: {
         registerUser: async (_, { username, password, confirmPassword }) => {
-            // Placeholder resolver for registering a user
-            return null; // Returning null as a placeholder
-        },
+            const { valid, errors } = validateRegisterInput(username, password, confirmPassword);
+      
+            if (!valid) {
+              throw new GraphQLError(errors, {
+                extensions: {
+                  code: 'UNAUTHORIZED',
+                },
+              });
+            }
+      
+            const user = await User.findOne({ username });
+      
+            if (user) {
+              throw new GraphQLError('Email is already taken', {
+                extensions: {
+                  code: 'TAKEN',
+                },
+              });
+            }
+      
+            password = await bcrypt.hash(password, 12);
+      
+            const newUser = new User({
+              username,
+              password,
+            });
+      
+            const result = await newUser.save();
+            const token = generateToken(result);
+      
+            return { user: result, token };
+          },
         loginUser: async (_, { username, password }) => {
-            // Placeholder resolver for logging in a user
-            return null; // Returning null as a placeholder
+            const { valid, errors } = validateLoginInput(username, password);
+
+            if (!valid) {
+                throw new GraphQLError(errors, {
+                    extensions: {
+                        code: 'UNAUTHORIZED',
+                    },
+                });
+            }
+
+            const user = await User.findOne({ username });
+
+            if (!user) {
+                throw new GraphQLError('Incorrect username or password', {
+                    extensions: {
+                        code: 'BAD_INPUT',
+                    },
+                });
+            }
+
+            const match = await bcrypt.compare(password, user.password);
+
+            if (!match) {
+                throw new GraphQLError('Incorrect username or password', {
+                    extensions: {
+                        code: 'BAD_INPUT',
+                    },
+                });
+            }
+
+            const token = generateToken(user);
+
+            return { user, token };
         },
         deposit: async (_, { amount }, context) => {
             // Placeholder resolver for deposit operation
