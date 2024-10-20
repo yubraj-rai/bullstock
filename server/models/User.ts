@@ -38,6 +38,8 @@ const UserSchema = new Schema({
         default: 500,
         min: 0,
     },
+    otp: { type: String, required: false },
+    otpExpiry: { type: Date, required: false }
 });
 
 // Export the Mongoose model for the User schema
