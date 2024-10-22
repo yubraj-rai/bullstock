@@ -8,9 +8,6 @@ export const validateRegisterInput = (username, password, confirmPassword) => {
         errors = 'Invalid Email.';
     }
 
-    // if (username.trim().length < 4 || username.trim().length > 12) {
-    //     errors = 'Username must be between 4-12 characters';
-    // }
 
     const specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
 
