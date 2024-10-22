@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { GraphQLError } from 'graphql';
 import bcrypt from 'bcryptjs';
 import { validateLoginInput } from '../../utils/AuthValidator';
+import { verifyGoogleToken } from '../../utils/googleAuth';
 
 const generateToken = (user) => {
     return jwt.sign(
@@ -68,6 +69,30 @@ export const UserResolver = {
             // Placeholder resolver for changing username
             return null; // Returning null as a placeholder
         },
+        googleLogin: async (_, { googleToken }) => {
+            try {
+              const { email, name } = await verifyGoogleToken(googleToken);
+      
+              // Check if the user already exists
+              let user = await User.findOne({ username: email });
+      
+              if (!user) {
+                // If the user doesn't exist, create a new one
+                user = await User.create({ username: email, password: 'google-oauth', balance: 500 });
+              }
+      
+              // Generate a JWT for the user
+              const token = generateToken(user);
+      
+              return { user, token };
+            } catch (error) {
+              throw new GraphQLError('Google authentication failed', {
+                extensions: {
+                  code: 'UNAUTHORIZED',
+                },
+              });
+            }
+          },
     },
 
     Query: {

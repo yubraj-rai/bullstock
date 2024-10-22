@@ -10,14 +10,6 @@ const UserSchema = new Schema({
         type: String,
         required: true,
     },
-    email: {
-        type: String,
-        required: true,
-    },
-    authProvider: {
-        type: String,
-        required: true
-    },
     createdAt: {
         type: Date,
         default: Date.now,
@@ -37,6 +29,10 @@ const UserSchema = new Schema({
         type: Number,
         default: 500,
         min: 0,
+    },
+    googleId: {
+        type: String,
+        unique: true,
     },
     otp: { type: String, required: false },
     otpExpiry: { type: Date, required: false }
