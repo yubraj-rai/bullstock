@@ -2,8 +2,7 @@ import { User } from '../../models/User';
 import jwt from 'jsonwebtoken';
 import { GraphQLError } from 'graphql';
 import bcrypt from 'bcryptjs';
-import { validateLoginInput } from '../../utils/AuthValidator';
-import { verifyGoogleToken } from '../../utils/googleAuth';
+import { validateLoginInput, validateRegisterInput } from '../../utils/AuthValidator';
 
 const generateToken = (user) => {
     return jwt.sign(
@@ -19,9 +18,41 @@ const generateToken = (user) => {
 export const UserResolver = {
     Mutation: {
         registerUser: async (_, { username, password, confirmPassword }) => {
-            // Placeholder resolver for registering a user
-            return null; // Returning null as a placeholder
-        },
+            const { valid, errors } = validateRegisterInput(username, password, confirmPassword);
+      
+            console.log(username) ;
+            console.log(password) ;
+            console.log(confirmPassword) ;
+            if (!valid) {
+              throw new GraphQLError(errors, {
+                extensions: {
+                  code: 'UNAUTHORIZED',
+                },
+              });
+            }
+      
+            const user = await User.findOne({ username });
+      
+            if (user) {
+              throw new GraphQLError('Email is already taken', {
+                extensions: {
+                  code: 'TAKEN',
+                },
+              });
+            }
+      
+            password = await bcrypt.hash(password, 12);
+      
+            const newUser = new User({
+              username,
+              password,
+            });
+      
+            const result = await newUser.save();
+            const token = generateToken(result);
+      
+            return { user: result, token };
+          },
         loginUser: async (_, { username, password }) => {
             const { valid, errors } = validateLoginInput(username, password);
 
@@ -69,30 +100,6 @@ export const UserResolver = {
             // Placeholder resolver for changing username
             return null; // Returning null as a placeholder
         },
-        googleLogin: async (_, { googleToken }) => {
-            try {
-              const { email, name } = await verifyGoogleToken(googleToken);
-      
-              // Check if the user already exists
-              let user = await User.findOne({ username: email });
-      
-              if (!user) {
-                // If the user doesn't exist, create a new one
-                user = await User.create({ username: email, password: 'google-oauth', balance: 500 });
-              }
-      
-              // Generate a JWT for the user
-              const token = generateToken(user);
-      
-              return { user, token };
-            } catch (error) {
-              throw new GraphQLError('Google authentication failed', {
-                extensions: {
-                  code: 'UNAUTHORIZED',
-                },
-              });
-            }
-          },
     },
 
     Query: {

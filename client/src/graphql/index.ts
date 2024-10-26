@@ -78,3 +78,41 @@ export const GOOGLE_LOGIN = gql(`
     }
   }
 `);
+
+export const GET_STOCKS = gql(`
+  query SearchStocks($search: String, $limit: Int, $random: Boolean) {
+      searchStocks(search: $search, limit: $limit, random: $random) {
+          ticker
+          name
+          exchange
+          price
+          logo
+          ipo
+          industry
+          country
+          currency
+          weburl
+      }
+  }
+`);
+
+export const GET_OWNEDSTOCKS = gql(`
+  query GetOwnedStocks {
+      ownedStocks {
+          _id
+          userId
+          ticker
+          shares
+          initialInvestment
+          name
+          exchange
+          price
+          logo
+          ipo
+          industry
+          country
+          currency
+          weburl
+      }
+  }
+`);
