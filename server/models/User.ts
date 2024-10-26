@@ -32,7 +32,7 @@ const UserSchema = new Schema({
     },
     googleId: {
         type: String,
-        unique: true,
+        default: false,
     },
     otp: { type: String, required: false },
     otpExpiry: { type: Date, required: false }

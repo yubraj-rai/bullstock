@@ -18,4 +18,22 @@ interface AuthState {
     authReducer: AuthReducer;
 }
 
-export type { AuthState };
+interface Stock {
+    ticker: string;
+    name: string;
+    price: number;
+    exchange: string;
+    industry: string;
+    logo: string;
+    ipo: string;
+    country: string;
+    currency: string;
+    weburl: string;
+}
+
+interface StockUpdate {
+    price: number;
+}
+
+
+export type { AuthState, Stock, StockUpdate, };
