@@ -7,6 +7,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import { Server } from 'socket.io';
 import schema from './graphql/schema';
+import { stopUpdatingStockPrices, updateStockPrices } from './socket/market';
+
 
 dotenv.config();
 
@@ -65,9 +67,11 @@ const init = async () => {
 
     io.on('connection', (socket) => {
         console.log('New client connected:', socket?.id);
+        updateStockPrices(2, 10000, io);
 
         socket.on('disconnect', () => {
             if (io.engine.clientsCount === 0) {
+                stopUpdatingStockPrices(2);
                 console.log('No users connected, stopped stock updates');
             }
         });

@@ -1,56 +1,70 @@
+import ReactDOM from 'react-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import Footer from './components/Footer';
+import Navbar from './components/Navbar';
+import ScrollToTop from './components/ScrollToTop';
 import './index.css';
-import { motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
+import AuthPage from './pages/AuthPage';
+import ForgetPasswordPage from './pages/ForgetPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import VerifyOtpPage from './pages/VerifyOtpPage';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import HomePage from './pages/HomePage';
+import MarketPage from './pages/MarketPage';
+import { useLazyQuery } from '@apollo/client';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { VERIFY_USER, GET_OWNEDSTOCKS } from './graphql';
+import { AUTH, OWNED_STOCKS } from './redux/actions';
 
 function App() {
-  return (
-    <div className="bg-gradient-to-br from-blue-500 to-purple-600 min-h-screen flex items-center justify-center p-6">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6 }}
-        className="bg-white rounded-xl shadow-2xl p-8 max-w-xl w-full transform hover:scale-105 transition-all duration-500"
-      >
-        <h1 className="text-4xl font-bold text-center mb-4 text-purple-800 animate-pulse">
-          LongJohnMethods
-        </h1>
-        <h2 className="text-2xl font-semibold text-center mb-6 text-blue-800">
-          Bullstock - Stock Trading Application
-        </h2>
+    const [getOwnedStocks, { data: ownedStocksData, loading: ownedStockLoading }] = useLazyQuery(GET_OWNEDSTOCKS);
+    const [verifyUser, { data: userData, loading: userLoading }] = useLazyQuery(VERIFY_USER);
+    const dispatch = useDispatch();
+    const location = useLocation();
 
-        <motion.h3
-          className="text-lg font-semibold mb-4 text-gray-900"
-          initial={{ x: -200 }}
-          animate={{ x: 0 }}
-          transition={{ delay: 0.2, duration: 0.8 }}
-        >
-          Project Team Members:
-        </motion.h3>
-        <ul className="list-disc pl-5 mb-4 space-y-2 text-gray-700">
-          <motion.li whileHover={{ scale: 1.1, color: '#5D3FD3' }}>
-            Hirak Rajendrakumar Babariya
-          </motion.li>
-          <motion.li whileHover={{ scale: 1.1, color: '#5D3FD3' }}>
-            Dhru Manishkumar Patel
-          </motion.li>
-          <motion.li whileHover={{ scale: 1.1, color: '#5D3FD3' }}>
-            Krishna Patel
-          </motion.li>
-          <motion.li whileHover={{ scale: 1.1, color: '#5D3FD3' }}>
-            Yubraj Rai
-          </motion.li>
-        </ul>
+    useEffect(() => {
+        verifyUser();
+    }, [verifyUser]);
 
-        <motion.div
-          className="text-center text-sm text-gray-600 mt-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 1 }}
-        >
-          <p>2024F-T4 CPL 5559 - WIL Project 05 (FSDM Group 1)</p>
-        </motion.div>
-      </motion.div>
-    </div>
-  );
+    useEffect(() => {
+        if (userData && !userLoading) {
+            dispatch({ type: AUTH, payload: userData?.getUser });
+        }
+    }, [userData, userLoading, dispatch]);
+
+    useEffect(() => {
+        getOwnedStocks();
+    }, [getOwnedStocks]);
+
+    useEffect(() => {
+        if (ownedStocksData && !ownedStockLoading) {
+            dispatch({ type: OWNED_STOCKS, payload: ownedStocksData.ownedStocks });
+        }
+    }, [ownedStocksData, ownedStockLoading, dispatch]);
+    
+    return (
+        <AnimatePresence>
+            <ScrollToTop>
+                <Navbar />
+                <Routes location={location} key={location.pathname}>
+                    <Route index element={<HomePage />} />
+                    <Route path='/market' element={<MarketPage />} />
+                    <Route path='/auth' element={<AuthPage />} />
+                    <Route path='/forget' element={<ForgetPasswordPage />} />
+                    <Route path='/verify' element={<VerifyOtpPage />} />
+                    <Route path='/reset' element={<ResetPasswordPage />} />
+                </Routes>
+                <Footer />
+            </ScrollToTop>
+        </AnimatePresence>
+    );
 }
 
-export default App;
+ReactDOM.render(
+    <GoogleOAuthProvider clientId="YOUR_CLIENT_ID">
+        <App />
+    </GoogleOAuthProvider>,
+    document.getElementById('root')
+);
