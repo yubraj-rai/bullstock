@@ -5,7 +5,7 @@ import { useMutation } from '@apollo/client';
 import { AuthState } from '../types';
 import { AUTH } from '../redux/actions';
 import { LOGIN_USER, REGISTER_USER, GOOGLE_LOGIN } from '../graphql';
-import { GoogleLogin } from '@react-oauth/google';
+import { GoogleLogin } from '@react-oauth/google'; // Import GoogleLogin component
 
 const initialState = { username: '', password: '', confirmPassword: '' };
 
@@ -50,7 +50,6 @@ const Auth = () => {
         const { data } = await loginMutation({ variables: { username: form.username, password: form.password } });
         setErrors(null);
         dispatch({ type: AUTH, payload: data.loginUser });
-
         navigate(location?.state?.redirect || '/account');
       } catch (err: any) {
         setErrors(err.message);
@@ -205,7 +204,7 @@ const Auth = () => {
           </>
         ) : (
           <div className='p-10 flex flex-col justify-center items-center'>
-            <h3 className='mt-1 text-xl font-medium text-center text-gray-600 dark:text-gray-200'>You're signed in!</h3>{' '}
+            <h3 className='mt-1 text-xl font-medium text-center text-gray-600 dark:text-gray-200'>You're signed in!</h3>
             <div className='mt-8'>
               <Link
                 to='/market'

@@ -5,28 +5,26 @@ export const StockResolver = {
         searchStocks: async (_, { search = null, limit, random }) => {
             let searchQuery = {};
 
-            // run if search is provided
+            // Run if search is provided
             if (search) {
                 searchQuery = {
                     $or: [
-                        { ticker: { $regex: new RegExp(search, 'i') } },
-                        { name: { $regex: new RegExp(search, 'i') } },
-                        { ipo: { $regex: new RegExp(search, 'i') } },
+                        { ticker: { $regex: search, $options: 'i' } },
+                        { name: { $regex: search, $options: 'i' } },
+                        { ipo: { $regex: search, $options: 'i' } },
                     ],
                 };
             }
-            
 
             if (random === false) {
-                // run query to find users
+                // Run query to find stocks
                 const stocks = await Stock.find(searchQuery)
                     .sort({ name: 1 })
                     .limit(limit);
-            
+
                 return stocks;
-            }
-            else {
-                const stocks = await Stock.aggregate([{ $match: searchQuery }, { $sample: { size: limit } }]).sort({ ['name']: 1 });
+            } else {
+                const stocks = await Stock.aggregate([{ $match: searchQuery }, { $sample: { size: limit } }]).sort({ name: 1 });
 
                 return stocks;
             }

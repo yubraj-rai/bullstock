@@ -9,7 +9,7 @@ import AuthPage from './pages/AuthPage';
 import ForgetPasswordPage from './pages/ForgetPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import VerifyOtpPage from './pages/VerifyOtpPage';
-import { GoogleOAuthProvider } from '@react-oauth/google';
+import { GoogleOAuthProvider } from '@react-oauth/google'; // Keep this line
 import HomePage from './pages/HomePage';
 import MarketPage from './pages/MarketPage';
 import { useLazyQuery } from '@apollo/client';
