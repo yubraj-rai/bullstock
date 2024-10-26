@@ -6,6 +6,7 @@ import { TransactionResolver } from './Transactions';
 import { marketNewsResolvers } from './MarketNews';
 import { GraphQLScalarType, Kind } from 'graphql';
 import { GraphQLJSON } from 'graphql-compose';
+import { OtpResolver } from './Otp';
 
 // Define the custom Date scalar type
 const dateScalar = new GraphQLScalarType({
@@ -32,6 +33,7 @@ export const resolvers = merge(
     OwnedStockResolver,
     TransactionResolver,
     marketNewsResolvers,
+    OtpResolver,
     { Date: dateScalar },
     { JSON: GraphQLJSON }
 );

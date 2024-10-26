@@ -36,5 +36,8 @@ export const UserTypeDef = `#graphql
         withdraw(amount: Float!): balanceResponse!
         changeUsername(newUsername: String!, confirmPassword: String!): usernameChangeResponse!
         googleLogin(googleToken: String!): UserResponse!
+        sendOtp(username: String!): String
+        verifyOtp(username: String!, otp: String!): String
+        resetPassword(username: String!, password: String!, confirmPassword: String!): String
 }
 `;
