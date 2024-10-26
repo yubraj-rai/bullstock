@@ -5,7 +5,11 @@ import { useMutation } from '@apollo/client';
 import { AuthState } from '../types';
 import { AUTH } from '../redux/actions';
 import { LOGIN_USER, REGISTER_USER, GOOGLE_LOGIN } from '../graphql';
-import { GoogleLogin } from '@react-oauth/google'; // Import GoogleLogin component
+import { useMutation, useLazyQuery } from '@apollo/client';
+import { AuthState } from '../types';
+import { AUTH } from '../redux/actions';
+import { LOGIN_USER, REGISTER_USER, GOOGLE_LOGIN } from '../graphql';
+import { GoogleLogin } from '@react-oauth/google';  // Import GoogleLogin component
 
 const initialState = { username: '', password: '', confirmPassword: '' };
 
@@ -40,17 +44,7 @@ const Auth = () => {
         const { data } = await registerMutation({ variables: { username: form.username, password: form.password, confirmPassword: form.confirmPassword } });
         setErrors(null);
         dispatch({ type: AUTH, payload: data.registerUser });
-        navigate(location?.state?.redirect || '/market');
-      } catch (err: any) {
-        setErrors(err.message);
-        setIsLoading(false);
-      }
-    } else {
-      try {
-        const { data } = await loginMutation({ variables: { username: form.username, password: form.password } });
-        setErrors(null);
-        dispatch({ type: AUTH, payload: data.loginUser });
-        navigate(location?.state?.redirect || '/account');
+        navigate(location?.state?.redirect || '/market')
       } catch (err: any) {
         setErrors(err.message);
         setIsLoading(false);
@@ -204,7 +198,7 @@ const Auth = () => {
           </>
         ) : (
           <div className='p-10 flex flex-col justify-center items-center'>
-            <h3 className='mt-1 text-xl font-medium text-center text-gray-600 dark:text-gray-200'>You're signed in!</h3>
+            <h3 className='mt-1 text-xl font-medium text-center text-gray-600 dark:text-gray-200'>You're signed in!</h3>{' '}
             <div className='mt-8'>
               <Link
                 to='/market'

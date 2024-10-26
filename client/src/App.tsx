@@ -1,4 +1,3 @@
-import ReactDOM from 'react-dom';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
@@ -44,22 +43,24 @@ function App() {
         }
     }, [ownedStocksData, ownedStockLoading, dispatch]);
     
-    return (
-        <AnimatePresence>
-            <ScrollToTop>
-                <Navbar />
-                <Routes location={location} key={location.pathname}>
-                    <Route index element={<HomePage />} />
-                    <Route path='/market' element={<MarketPage />} />
-                    <Route path='/auth' element={<AuthPage />} />
-                    <Route path='/forget' element={<ForgetPasswordPage />} />
-                    <Route path='/verify' element={<VerifyOtpPage />} />
-                    <Route path='/reset' element={<ResetPasswordPage />} />
-                </Routes>
-                <Footer />
-            </ScrollToTop>
-        </AnimatePresence>
-    );
+
+  return (
+    <AnimatePresence>
+        <ScrollToTop>
+            <Navbar />
+            <Routes location={location} key={location.pathname}>
+                <Route index element={<HomePage />} />
+                <Route path='/market' element={<MarketPage />} />
+                <Route path='/auth' element={<AuthPage />} />
+                <Route path='/forget' element={<ForgetPasswordPage />} />
+                <Route path='/verify' element={<VerifyOtpPage />} />
+                <Route path='/reset' element={<ResetPasswordPage />} />
+
+            </Routes>
+            <Footer />
+        </ScrollToTop>
+    </AnimatePresence>
+);
 }
 
 ReactDOM.render(
