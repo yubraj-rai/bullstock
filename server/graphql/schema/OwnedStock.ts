@@ -30,6 +30,7 @@ export const OwnedStockTypeDef = `#graphql
 
     type Mutation {
         buyStock(ticker: String!, shares: Int!): stockTransactionResponse!
+        ownStock(ticker: String!, shares: Int!): stockTransactionResponse!
         sellStock(ticker: String!, shares: Int!): stockTransactionResponse!
     }
 `;
