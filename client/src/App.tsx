@@ -8,6 +8,7 @@ import AuthPage from './pages/AuthPage';
 import ForgetPasswordPage from './pages/ForgetPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import VerifyOtpPage from './pages/VerifyOtpPage';
+import { GoogleOAuthProvider } from '@react-oauth/google'; // Keep this line
 import HomePage from './pages/HomePage';
 import MarketPage from './pages/MarketPage';
 import { useLazyQuery } from '@apollo/client';
@@ -15,7 +16,6 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { VERIFY_USER, GET_OWNEDSTOCKS } from './graphql';
 import { AUTH, OWNED_STOCKS } from './redux/actions';
-
 
 function App() {
     const [getOwnedStocks, { data: ownedStocksData, loading: ownedStockLoading }] = useLazyQuery(GET_OWNEDSTOCKS);
@@ -43,6 +43,7 @@ function App() {
         }
     }, [ownedStocksData, ownedStockLoading, dispatch]);
     
+
   return (
     <AnimatePresence>
         <ScrollToTop>
@@ -62,4 +63,9 @@ function App() {
 );
 }
 
-export default App;
+ReactDOM.render(
+    <GoogleOAuthProvider clientId="YOUR_CLIENT_ID">
+        <App />
+    </GoogleOAuthProvider>,
+    document.getElementById('root')
+);

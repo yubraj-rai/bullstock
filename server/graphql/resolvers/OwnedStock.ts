@@ -87,8 +87,66 @@ export const OwnedStockResolver = {
             }
         },
         sellStock: async (_, { ticker, shares }, context) => {
-            // Placeholder resolver for sellStock mutation
-            return { ownedStock: null, newBalance: 0 }; // Returning default values
+            const { token } = context;
+
+            const authResult = await verifyToken(token);
+
+            if (authResult.error) {
+                throw new GraphQLError(authResult.error, {
+                    extensions: {
+                        code: 'UNAUTHORIZED',
+                    },
+                });
+            }
+
+            const ownedStock = await OwnedStock.findOne({ userId: authResult.userId, ticker });
+
+            if (!ownedStock) {
+                throw new GraphQLError('Stock not owned', {
+                    extensions: {
+                        code: 'BAD_REQUEST',
+                    },
+                });
+            }
+
+            if (ownedStock.shares < shares) {
+                throw new GraphQLError('Invalid shares', {
+                    extensions: {
+                        code: 'INVALID_SHARES',
+                    },
+                });
+            }
+
+            const stock = await Stock.findOne({ ticker });
+            const profit = stock.price * shares;
+            const initialInvestment = ownedStock.initialInvestment - (ownedStock.initialInvestment * shares) / ownedStock.shares;
+
+            const result = await OwnedStock.findOneAndUpdate(
+                { userId: authResult.userId, ticker },
+                { $inc: { shares: -shares }, initialInvestment },
+                { new: true }
+            );
+
+            const newTransaction = new Transaction({
+                userId: authResult.userId,
+                type: 'SELL',
+                ticker,
+                shares,
+                totalAmount: profit,
+                stockPrice: stock.price,
+            });
+            await newTransaction.save();
+
+            if (result.shares === 0) {
+                await OwnedStock.findOneAndDelete({ userId: authResult.userId, ticker });
+            }
+
+            const user = await User.findOneAndUpdate({ _id: authResult.userId }, { $inc: { balance: profit } }, { new: true });
+
+            clearFirstTransaction(authResult.userId);
+
+            return { ownedStock: result, newBalance: user.balance };
         },
     },
-};
+}
+

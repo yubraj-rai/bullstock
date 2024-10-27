@@ -31,13 +31,14 @@ const TransactionSchema = new Schema({
     },
     date: {
         type: Date,
-        default: Date.now,
+        default: () => Date.now(),
     },
     paymentMethod: {
         type: String,
         required: false,
     },
 });
+
 
 // Export the Mongoose model for the Transaction schema
 export const Transaction = mongoose.model('Transaction', TransactionSchema);

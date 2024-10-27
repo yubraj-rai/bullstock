@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useMutation } from '@apollo/client';
+import { AuthState } from '../types';
+import { AUTH } from '../redux/actions';
+import { LOGIN_USER, REGISTER_USER, GOOGLE_LOGIN } from '../graphql';
 import { useMutation, useLazyQuery } from '@apollo/client';
 import { AuthState } from '../types';
 import { AUTH } from '../redux/actions';
@@ -40,18 +44,7 @@ const Auth = () => {
         const { data } = await registerMutation({ variables: { username: form.username, password: form.password, confirmPassword: form.confirmPassword } });
         setErrors(null);
         dispatch({ type: AUTH, payload: data.registerUser });
-        navigate(location?.state?.redirect || '/market');
-      } catch (err: any) {
-        setErrors(err.message);
-        setIsLoading(false);
-      }
-    } else {
-      try {
-        const { data } = await loginMutation({ variables: { username: form.username, password: form.password } });
-        setErrors(null);
-        dispatch({ type: AUTH, payload: data.loginUser });
-
-        navigate(location?.state?.redirect || '/account');
+        navigate(location?.state?.redirect || '/market')
       } catch (err: any) {
         setErrors(err.message);
         setIsLoading(false);

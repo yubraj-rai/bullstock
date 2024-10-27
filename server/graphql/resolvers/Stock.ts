@@ -16,6 +16,7 @@ export const StockResolver = {
                 };
             }
 
+
             if (!random) {
                 // execute query to search users
                 const stocks = await Stock.find(searchQuery)
@@ -24,6 +25,7 @@ export const StockResolver = {
 
                 return stocks;
             } else {
+
                 const stocks = await Stock.aggregate([{ $match: searchQuery }, { $sample: { size: limit } }]).sort({ ['name']: 1 });
 
                 return stocks;
