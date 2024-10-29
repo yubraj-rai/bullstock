@@ -1,3 +1,4 @@
+import { OwnedStock } from "./__generated__/graphql";
 
 interface User {
     _id: string;
@@ -35,5 +36,13 @@ interface StockUpdate {
     price: number;
 }
 
+interface OwnedStocksReducer {
+    ownedStocks: OwnedStock[];
+}
 
-export type { AuthState, Stock, StockUpdate, };
+interface OwnedStocksState {
+    ownedStocksReducer: OwnedStocksReducer;
+}
+
+
+export type { AuthState, Stock, StockUpdate, OwnedStocksState};

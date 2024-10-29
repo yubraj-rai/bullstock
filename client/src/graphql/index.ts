@@ -146,3 +146,20 @@ export const SELL_STOCK = gql(`
       }
   }
 `);
+
+export const GET_STOCK = gql(`
+  query GETSTOCK($ticker: String) {
+      stock(ticker: $ticker) {
+          ticker
+          name
+          exchange
+          price
+          logo
+          ipo
+          industry
+          country
+          currency
+          weburl
+      }
+  }
+`);
