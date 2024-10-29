@@ -63,9 +63,11 @@ function App() {
 );
 }
 
-ReactDOM.render(
-    <GoogleOAuthProvider clientId="YOUR_CLIENT_ID">
-        <App />
-    </GoogleOAuthProvider>,
-    document.getElementById('root')
-);
+// ReactDOM.render(
+//     <GoogleOAuthProvider clientId="YOUR_CLIENT_ID">
+//         <App />
+//     </GoogleOAuthProvider>,
+//     document.getElementById('root')
+// );
+
+export default App;
