@@ -16,6 +16,7 @@ import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { VERIFY_USER, GET_OWNEDSTOCKS } from './graphql';
 import { AUTH, OWNED_STOCKS } from './redux/actions';
+import StockPage from './pages/StockPage';
 
 function App() {
     const [getOwnedStocks, { data: ownedStocksData, loading: ownedStockLoading }] = useLazyQuery(GET_OWNEDSTOCKS);
@@ -55,6 +56,7 @@ function App() {
                 <Route path='/forget' element={<ForgetPasswordPage />} />
                 <Route path='/verify' element={<VerifyOtpPage />} />
                 <Route path='/reset' element={<ResetPasswordPage />} />
+                <Route path='/stock/:ticker' element={<StockPage ticker={useLocation().pathname.replace('/stock/', '')} />} />
 
             </Routes>
             <Footer />
