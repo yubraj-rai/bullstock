@@ -1,19 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useMutation } from '@apollo/client';
-import { AuthState } from '../types';
-import { AUTH } from '../redux/actions';
-import { LOGIN_USER, REGISTER_USER, GOOGLE_LOGIN } from '../graphql';
 import { useMutation, useLazyQuery } from '@apollo/client';
 import { AuthState } from '../types';
-import { AUTH } from '../redux/actions';
-import { LOGIN_USER, REGISTER_USER, GOOGLE_LOGIN } from '../graphql';
+import { AUTH, OWNED_STOCKS } from '../redux/actions';
+import { LOGIN_USER, REGISTER_USER, GET_OWNEDSTOCKS, GOOGLE_LOGIN } from '../graphql';
 import { GoogleLogin } from '@react-oauth/google';  // Import GoogleLogin component
 
 const initialState = { username: '', password: '', confirmPassword: '' };
 
 const Auth = () => {
+  const [getOwnedStocks, { data: ownedStocksData }] = useLazyQuery(GET_OWNEDSTOCKS);
   const auth = useSelector((state: AuthState) => state.authReducer.authData);
   const [loginMutation] = useMutation(LOGIN_USER);
   const [registerMutation] = useMutation(REGISTER_USER);
@@ -44,7 +41,25 @@ const Auth = () => {
         const { data } = await registerMutation({ variables: { username: form.username, password: form.password, confirmPassword: form.confirmPassword } });
         setErrors(null);
         dispatch({ type: AUTH, payload: data.registerUser });
-        navigate(location?.state?.redirect || '/market')
+        dispatch({ type: OWNED_STOCKS, payload: {} });
+        navigate(location?.state?.redirect || '/market');
+      } catch (err: any) {
+        setErrors(err.message);
+        setIsLoading(false);
+      }
+    } else {
+      try {
+        const { data } = await loginMutation({ variables: { username: form.username, password: form.password } });
+        setErrors(null);
+        dispatch({ type: AUTH, payload: data.loginUser });
+
+        getOwnedStocks();
+
+        if (ownedStocksData) {
+          dispatch({ type: OWNED_STOCKS, payload: ownedStocksData.ownedStocks });
+        }
+
+        navigate(location?.state?.redirect || '/account');
       } catch (err: any) {
         setErrors(err.message);
         setIsLoading(false);
