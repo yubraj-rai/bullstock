@@ -12,6 +12,7 @@ import BullstockLunchIcon from '../assets/icons/bullstock-lunch.png';
 const navigation = [
     { name: 'Home', redirect: '/', current: true },
     { name: 'Market', redirect: '/market', current: false },
+    { name: 'Latest News', redirect: '/news', current: false },
 ];
 
 function classNames(...classes: any) {
