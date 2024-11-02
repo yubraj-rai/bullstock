@@ -8,7 +8,7 @@ import AuthPage from './pages/AuthPage';
 import ForgetPasswordPage from './pages/ForgetPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import VerifyOtpPage from './pages/VerifyOtpPage';
-import { GoogleOAuthProvider } from '@react-oauth/google'; // Keep this line
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import HomePage from './pages/HomePage';
 import MarketPage from './pages/MarketPage';
 import { useLazyQuery } from '@apollo/client';
@@ -17,6 +17,7 @@ import { useDispatch } from 'react-redux';
 import { VERIFY_USER, GET_OWNEDSTOCKS } from './graphql';
 import { AUTH, OWNED_STOCKS } from './redux/actions';
 import StockPage from './pages/StockPage';
+import NewsPage from './pages/NewsPage';
 
 function App() {
     const [getOwnedStocks, { data: ownedStocksData, loading: ownedStockLoading }] = useLazyQuery(GET_OWNEDSTOCKS);
@@ -43,33 +44,25 @@ function App() {
             dispatch({ type: OWNED_STOCKS, payload: ownedStocksData.ownedStocks });
         }
     }, [ownedStocksData, ownedStockLoading, dispatch]);
-    
 
-  return (
-    <AnimatePresence>
-        <ScrollToTop>
-            <Navbar />
-            <Routes location={location} key={location.pathname}>
-                <Route index element={<HomePage />} />
-                <Route path='/market' element={<MarketPage />} />
-                <Route path='/auth' element={<AuthPage />} />
-                <Route path='/forget' element={<ForgetPasswordPage />} />
-                <Route path='/verify' element={<VerifyOtpPage />} />
-                <Route path='/reset' element={<ResetPasswordPage />} />
-                <Route path='/stock/:ticker' element={<StockPage ticker={useLocation().pathname.replace('/stock/', '')} />} />
-
-            </Routes>
-            <Footer />
-        </ScrollToTop>
-    </AnimatePresence>
-);
+    return (
+        <AnimatePresence>
+            <ScrollToTop>
+                <Navbar />
+                <Routes location={location} key={location.pathname}>
+                    <Route index element={<HomePage />} />
+                    <Route path='/market' element={<MarketPage />} />
+                    <Route path='/auth' element={<AuthPage />} />
+                    <Route path='/forget' element={<ForgetPasswordPage />} />
+                    <Route path='/verify' element={<VerifyOtpPage />} />
+                    <Route path='/reset' element={<ResetPasswordPage />} />
+                    <Route path='/news' element={<NewsPage />} />
+                    <Route path='/stock/:ticker' element={<StockPage ticker={useLocation().pathname.replace('/stock/', '')} />} />
+                </Routes>
+                {location.pathname !== '/news' && <Footer />}
+            </ScrollToTop>
+        </AnimatePresence>
+    );
 }
-
-// ReactDOM.render(
-//     <GoogleOAuthProvider clientId="YOUR_CLIENT_ID">
-//         <App />
-//     </GoogleOAuthProvider>,
-//     document.getElementById('root')
-// );
 
 export default App;
