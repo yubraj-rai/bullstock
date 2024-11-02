@@ -44,9 +44,6 @@ const StockSchema = new Schema(
             required: true,
         },
     },
-    {
-        collection: 'stocks', // Ensures the data is stored in the 'stocks' collection in MongoDB
-    }
 );
 
 // Export the Mongoose model for the Stock schema
