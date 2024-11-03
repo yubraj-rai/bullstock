@@ -1,15 +1,14 @@
+// graphql/schema/MarketNews.ts
 export const MarketNewsTypeDef = `#graphql
-    scalar Date
     type MarketNews {
         title: String!
-        description: String!
-        source: String!
-        publishedAt: Date!
-        url: Float!
+        description: String
+        url: String
+        imageUrl: String
+        publishedAt: Date
     }
 
-    type Query {
-    getLatestMarketNews(limit: Int): [MarketNews]
-}
-
+    extend type Query {
+        getMarketNews: [MarketNews!]!
+    }
 `;

@@ -1,28 +1,24 @@
-import mongoose, { Schema } from 'mongoose';
+// models/MarketNews.ts
+import mongoose, { Schema, Document } from 'mongoose';
 
-// Mongoose MarketNews Schema definition
-const MarketNewsSchema = new Schema({
-    title: {
-        type: String,
-        required: true,
-    },
-    description: {
-        type: String,
-        required: true,
-    },
-    source: {
-        type: String,
-        required: true,
-    },
-    publishedAt: {
-        type: Date,
-        required: true,
-    },
-    url: {
-        type: String,
-        required: true,
-    },
-});
+export interface IMarketNews extends Document {
+    title: string;
+    description: string;
+    url: string;
+    imageUrl: string;
+    publishedAt: Date;
+    createdAt: Date;
+}
 
-// Export the Mongoose model for the MarketNews schema
-export const MarketNews = mongoose.model('MarketNews', MarketNewsSchema);
+const MarketNewsSchema: Schema = new Schema(
+    {
+        title: { type: String, required: true },
+        description: { type: String },
+        url: { type: String, required: true },
+        imageUrl: { type: String },
+        publishedAt: { type: Date, required: true },
+    },
+    { timestamps: true }
+);
+
+export const MarketNews = mongoose.model<IMarketNews>('MarketNews', MarketNewsSchema);

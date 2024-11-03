@@ -8,7 +8,11 @@ import AuthPage from './pages/AuthPage';
 import ForgetPasswordPage from './pages/ForgetPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import VerifyOtpPage from './pages/VerifyOtpPage';
+<<<<<<< HEAD
 //import { GoogleOAuthProvider } from '@react-oauth/google';
+=======
+import { GoogleOAuthProvider } from '@react-oauth/google';
+>>>>>>> e06edf3712a00e129884423f3dc34cae67d073a8
 import HomePage from './pages/HomePage';
 import MarketPage from './pages/MarketPage';
 import { useLazyQuery } from '@apollo/client';
@@ -17,9 +21,13 @@ import { useDispatch } from 'react-redux';
 import { VERIFY_USER, GET_OWNEDSTOCKS } from './graphql';
 import { AUTH, OWNED_STOCKS } from './redux/actions';
 import StockPage from './pages/StockPage';
+<<<<<<< HEAD
 import socket from './socket';
 import axios from 'axios';
 import Stripe from 'react-stripe-checkout';
+=======
+import NewsPage from './pages/NewsPage';
+>>>>>>> e06edf3712a00e129884423f3dc34cae67d073a8
 
 function App() {
     const [getOwnedStocks, { data: ownedStocksData, loading: ownedStockLoading }] = useLazyQuery(GET_OWNEDSTOCKS);
@@ -62,6 +70,7 @@ function App() {
         }
     }, [ownedStocksData, ownedStockLoading, dispatch]);
 
+<<<<<<< HEAD
     // WebSocket connection setup
     useEffect(() => {
         // Listen for WebSocket events, e.g., "someEvent"
@@ -80,6 +89,8 @@ function App() {
         };
     }, []);
 
+=======
+>>>>>>> e06edf3712a00e129884423f3dc34cae67d073a8
     return (
         <AnimatePresence>
             <ScrollToTop>
@@ -91,6 +102,7 @@ function App() {
                     <Route path='/forget' element={<ForgetPasswordPage />} />
                     <Route path='/verify' element={<VerifyOtpPage />} />
                     <Route path='/reset' element={<ResetPasswordPage />} />
+<<<<<<< HEAD
                     <Route path='/stock/:ticker' element={<StockPage ticker={useLocation().pathname.replace('/stock/', '')} />} />
                 </Routes>
                 <div>
@@ -100,9 +112,19 @@ function App() {
         />
       </div>
                 <Footer />
+=======
+                    <Route path='/news' element={<NewsPage />} />
+                    <Route path='/stock/:ticker' element={<StockPage ticker={useLocation().pathname.replace('/stock/', '')} />} />
+                </Routes>
+                {location.pathname !== '/news' && <Footer />}
+>>>>>>> e06edf3712a00e129884423f3dc34cae67d073a8
             </ScrollToTop>
         </AnimatePresence>
     );
 }
 
+<<<<<<< HEAD
 export default App;
+=======
+export default App;
+>>>>>>> e06edf3712a00e129884423f3dc34cae67d073a8

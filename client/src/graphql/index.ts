@@ -163,3 +163,16 @@ export const GET_STOCK = gql(`
       }
   }
 `);
+
+
+export const GET_MARKET_NEWS = gql`
+    query {
+        getMarketNews {
+            title
+            description
+            url
+            imageUrl
+            publishedAt
+        }
+    }
+`;
