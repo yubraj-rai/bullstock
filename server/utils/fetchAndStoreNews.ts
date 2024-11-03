@@ -1,8 +1,7 @@
-// utils/fetchAndStoreNews.ts
 import fetch from 'node-fetch';
 import { MarketNews } from '../models/MarketNews';
 
-const NEWS_EXPIRY_MINUTES = 360; // Defines how recent the news data should be
+const NEWS_EXPIRY_MINUTES = 10; // Set to 10 minutes to match the API call delay
 
 export async function fetchAndStoreNews() {
     try {
@@ -16,6 +15,9 @@ export async function fetchAndStoreNews() {
                 return await MarketNews.find().sort({ publishedAt: -1 }); // Return existing news if recent
             }
         }
+
+        // Wait for 10 minutes if API has been hit recently
+        await new Promise(resolve => setTimeout(resolve, NEWS_EXPIRY_MINUTES * 60 * 1000));
 
         // Fetch new news data if none found or if outdated
         const response = await fetch(
