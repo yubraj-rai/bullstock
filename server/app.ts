@@ -14,7 +14,7 @@ import axios from 'axios';
 dotenv.config();
 
 const app = express();
-const striperoutes = require('./routes/middleware/stripe-route');
+const striperoutes = require('./middleware/stripe-route');
 
 
 // Middleware setup for handling JSON and URL-encoded data
