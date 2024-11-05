@@ -21,6 +21,8 @@ import socket from './socket';
 import axios from 'axios';
 import Stripe from 'react-stripe-checkout';
 import NewsPage from './pages/NewsPage';
+import AccountPage from './pages/AccountPage';
+
 
 function App() {
     const [getOwnedStocks, { data: ownedStocksData, loading: ownedStockLoading }] = useLazyQuery(GET_OWNEDSTOCKS);
@@ -94,6 +96,12 @@ function App() {
                     <Route path='/reset' element={<ResetPasswordPage />} />
                     <Route path='/stock/:ticker' element={<StockPage ticker={useLocation().pathname.replace('/stock/', '')} />} />
                     <Route path='/news' element={<NewsPage />} />
+                    <Route
+                        path='/account'
+                        element={
+                                <AccountPage />
+                        }
+                    />
                 </Routes>
 
                 <div>

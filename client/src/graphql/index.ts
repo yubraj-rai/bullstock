@@ -12,6 +12,33 @@ export const LOGIN_USER = gql(`
         }
     }
 `);
+export const GET_TRANSACTIONS = gql(`
+  query GetTransactions {
+      transactions {
+          userId
+          type
+          ticker
+          shares
+          totalAmount
+          stockPrice
+          date
+      }
+  }
+`);
+export const DEPOSIT = gql(`
+  mutation Deposit($amount: Float!) {
+      deposit(amount: $amount) {
+          newBalance
+      }
+  }
+`);
+export const WITHDRAW = gql(`
+  mutation Withdraw($amount: Float!) {
+      withdraw(amount: $amount) {
+          newBalance
+      }
+  }
+`);
 
 export const REGISTER_USER = gql(`
     mutation RegisterUser($username: String!, $password: String!, $confirmPassword: String!) {
