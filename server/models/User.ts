@@ -18,13 +18,6 @@ const UserSchema = new Schema({
         type: Date,
         default: Date.now,
     },
-    isVerified: {
-        type: Boolean,
-        default: false,
-    },
-    verificationToken: {
-        type: String,
-    },
     balance: {
         type: Number,
         default: 500,
@@ -32,10 +25,16 @@ const UserSchema = new Schema({
     },
     googleId: {
         type: String,
-        default: false,
+        sparse: true,  // This will allow `null` values for `googleId`
     },
-    otp: { type: String, required: false },
-    otpExpiry: { type: Date, required: false }
+    otp: { 
+        type: String, 
+        required: false 
+    },
+    otpExpiry: { 
+        type: Date, 
+        required: false 
+    }
 });
 
 // Export the Mongoose model for the User schema
