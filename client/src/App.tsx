@@ -44,6 +44,13 @@ function App() {
     const tokenHandler = (token) => {
         handleToken(1000, token); 
     };
+    useEffect(() => {
+        // Check for stored profile on app initialization
+        const profile = localStorage.getItem('profile');
+        if (profile) {
+            dispatch({ type: AUTH, payload: JSON.parse(profile) });
+        }
+    }, [dispatch]);
 
     useEffect(() => {
         verifyUser();

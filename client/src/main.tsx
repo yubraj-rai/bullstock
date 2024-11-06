@@ -12,14 +12,18 @@ import { setContext } from '@apollo/client/link/context';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 // Create Redux store
-const store = createStore(reducers, (window as any).__REDUX_DEVTOOLS_EXTENSION__ && (window as any).__REDUX_DEVTOOLS_EXTENSION__());
+const store = createStore(reducers);
 
 const httpLink = createHttpLink({
     uri: `${import.meta.env.VITE_API_URI || ''}/graphql`,
 });
 
 const authLink = setContext((_, { headers }) => {
-    const { token }: { token: string } = JSON.parse(localStorage.getItem('profile') || '{}');
+    // Get the authentication token from local storage if it exists
+    const profile = localStorage.getItem('profile');
+    const token = profile ? JSON.parse(profile).token : '';
+    
+    // Return the headers to the context so httpLink can read them
     return {
         headers: {
             ...headers,
@@ -31,9 +35,13 @@ const authLink = setContext((_, { headers }) => {
 const client = new ApolloClient({
     link: authLink.concat(httpLink),
     cache: new InMemoryCache(),
+    defaultOptions: {
+        watchQuery: {
+            fetchPolicy: 'cache-and-network',
+        },
+    },
 });
 
-// Ensure to use ReactDOM.createRoot for React 18+
 const rootElement = document.getElementById('root');
 if (rootElement) {
     const root = ReactDOM.createRoot(rootElement);
@@ -43,7 +51,6 @@ if (rootElement) {
                 <Provider store={store}>
                     <SocketProvider>
                         <Router>
-                            {/* Use Vite environment variable for Google Client ID */}
                             <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}>
                                 <App />
                             </GoogleOAuthProvider>

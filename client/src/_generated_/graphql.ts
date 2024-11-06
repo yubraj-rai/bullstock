@@ -23,4 +23,35 @@ export type Scalars = {
     type: Scalars['String']['output'];
     userId: Scalars['String']['output'];
   };
+  export type Stock = {
+    country: Scalars['String']['output'];
+    currency: Scalars['String']['output'];
+    exchange: Scalars['String']['output'];
+    industry: Scalars['String']['output'];
+    ipo: Scalars['String']['output'];
+    logo: Scalars['String']['output'];
+    name: Scalars['String']['output'];
+    price: Scalars['Float']['output'];
+    ticker: Scalars['String']['output'];
+    weburl: Scalars['String']['output'];
+  };
+  
+
+  export type OwnedStock = Stock & {
+    __typename?: 'OwnedStock';
+    _id: Scalars['String']['output'];
+    country: Scalars['String']['output'];
+    currency: Scalars['String']['output'];
+    exchange: Scalars['String']['output'];
+    industry: Scalars['String']['output'];
+    initialInvestment: Scalars['Float']['output'];
+    ipo: Scalars['String']['output'];
+    logo: Scalars['String']['output'];
+    name: Scalars['String']['output'];
+    price: Scalars['Float']['output'];
+    shares: Scalars['Int']['output'];
+    ticker: Scalars['String']['output'];
+    userId: Scalars['String']['output'];
+    weburl: Scalars['String']['output'];
+  };
   

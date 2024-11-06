@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { AuthState } from '../types';
 import { GET_TRANSACTIONS, DEPOSIT, WITHDRAW, CHANGE_USERNAME } from '../graphql';
 import { UPDATE_BALANCE, UPDATE_USERNAME } from '../redux/actions';
@@ -11,29 +12,130 @@ function classNames(...classes: any) {
     return classes.filter(Boolean).join(' ');
 }
 
+enum TabIndex {
+    Profile = 0,
+    Transactions = 1
+}
+
+const SESSION_KEYS = {
+    TRANSACTIONS: 'bullstock_transactions',
+    ACCOUNT_TAB: 'bullstock_account_tab',
+    TRANSFER_AMOUNT: 'bullstock_transfer_amount',
+    LAST_FETCH: 'bullstock_transactions_fetch'
+} as const;
+
+
+const sessionStorage = {
+    get: (key: string) => {
+        try {
+            const item = window.sessionStorage.getItem(key);
+            return item ? JSON.parse(item) : null;
+        } catch (e) {
+            console.error('Error reading from session storage:', e);
+            return null;
+        }
+    },
+    set: (key: string, value: any) => {
+        try {
+            window.sessionStorage.setItem(key, JSON.stringify(value));
+        } catch (e) {
+            console.error('Error writing to session storage:', e);
+        }
+    },
+    remove: (key: string) => {
+        window.sessionStorage.removeItem(key);
+    }
+};
+
+
 const transferOptions = [500, 1000, 10000];
 
 const AccountPage = () => {
-    const { data: transactionsRaw } = useQuery(GET_TRANSACTIONS);
-    const transactions: Transaction[] = useMemo(() => transactionsRaw?.transactions || [], [transactionsRaw]);
+    
+
+      const CACHE_DURATION = 5 * 60 * 1000;
+
+      const { data: transactionsData, loading, refetch } = useQuery(GET_TRANSACTIONS, {
+        fetchPolicy: 'cache-first',
+        onCompleted: (data) => {
+            // Cache the transactions data
+            sessionStorage.set(SESSION_KEYS.TRANSACTIONS, data.transactions);
+            sessionStorage.set(SESSION_KEYS.LAST_FETCH, Date.now());
+        }
+    });
+
+    const transactions: Transaction[] = useMemo(() => {
+        // Try to get cached transactions first
+        const cachedData = sessionStorage.get(SESSION_KEYS.TRANSACTIONS);
+        const lastFetch = sessionStorage.get(SESSION_KEYS.LAST_FETCH);
+        const isCacheValid = lastFetch && (Date.now() - lastFetch < CACHE_DURATION);
+
+        if (cachedData && isCacheValid) {
+            return cachedData;
+        }
+
+        // If cache is invalid or missing, use fresh data
+        return transactionsData?.transactions || [];
+    }, [transactionsData]);
+
     const auth = useSelector((state: AuthState) => state.authReducer.authData);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [searchParams] = useSearchParams();
+    const tabParam = searchParams.get('tab');
     const [depositMutation] = useMutation(DEPOSIT);
     const [withdrawMutation] = useMutation(WITHDRAW);
     const [changeUsernameMutation] = useMutation(CHANGE_USERNAME);
     const [errors, setErrors] = useState('');
-    const [transferAmount, setTransferAmount] = useState<number>(0);
     const [isLoadingDeposit, setIsLoadingDeposit] = useState(false);
     const [isLoadingWithDraw, setIsLoadingWithdraw] = useState(false);
     const [newUsername, setNewUsername] = useState<string>('');
     const [confirmPassword, setConfirmPassword] = useState<string>('');
     const [isLoadingUsername, setIsloadingUsername] = useState(false);
+    const [transferAmount, setTransferAmount] = useState<number>(() => {
+        // Initialize from session storage or default to 0
+        return sessionStorage.get(SESSION_KEYS.TRANSFER_AMOUNT) || 0;
+    });
+    const [selectedIndex, setSelectedIndex] = useState(() => {
+        // Initialize selected tab from session storage or default to 0
+        return sessionStorage.get(SESSION_KEYS.ACCOUNT_TAB) || 0;
+    });
+    
+
+    useEffect(() => {
+        sessionStorage.set(SESSION_KEYS.ACCOUNT_TAB, selectedIndex);
+    }, [selectedIndex]);
+
+    useEffect(() => {
+        sessionStorage.set(SESSION_KEYS.TRANSFER_AMOUNT, transferAmount);
+    }, [transferAmount]);
+
+    useEffect(() => {
+        const lastFetch = sessionStorage.get(SESSION_KEYS.LAST_FETCH);
+        if (!lastFetch || Date.now() - lastFetch > CACHE_DURATION) {
+            refetch();
+        }
+
+        const interval = setInterval(() => {
+            refetch();
+        }, CACHE_DURATION);
+
+        return () => clearInterval(interval);
+    }, [refetch]);
 
     useEffect(() => {
         if (auth) {
             document.title = auth?.user?.username + ' | Bullstock';
         }
     }, [auth]);
+
+    const initialTab = useMemo(() => {
+        if (tabParam === 'transactions') return TabIndex.Transactions;
+        if (tabParam === 'profile') return TabIndex.Profile;
+        const savedTab = sessionStorage.getItem(SESSION_KEYS.ACCOUNT_TAB);
+        return savedTab ? parseInt(savedTab) : TabIndex.Profile;
+    }, [tabParam]);
 
     const handleDeposit = () => {
         if (transferAmount > 0) {
@@ -47,6 +149,7 @@ const AccountPage = () => {
                         dispatch({ type: UPDATE_BALANCE, payload: { newBalance: data?.deposit.newBalance } });
                         setIsLoadingDeposit(false);
                         setTransferAmount(0);
+                        sessionStorage.remove(SESSION_KEYS.TRANSFER_AMOUNT);
                     }, 1500);
                 })
                 .catch((err) => {
@@ -69,6 +172,7 @@ const AccountPage = () => {
                         dispatch({ type: UPDATE_BALANCE, payload: { newBalance: data?.withdraw?.newBalance } });
                         setIsLoadingWithdraw(false);
                         setTransferAmount(0);
+                        sessionStorage.remove(SESSION_KEYS.TRANSFER_AMOUNT);
                     }, 1500);
                 })
                 .catch((err) => {
@@ -99,6 +203,15 @@ const AccountPage = () => {
             });
     };
 
+    const handleTabChange = (index: number) => {
+        setSelectedTab(index);
+        sessionStorage.setItem(SESSION_KEYS.ACCOUNT_TAB, index.toString());
+        
+        // Update URL without refresh
+        const tabName = index === TabIndex.Transactions ? 'transactions' : 'profile';
+        navigate(`/account?tab=${tabName}`, { replace: true });
+    };
+    
     return (
         <>
             {auth && (
