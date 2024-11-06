@@ -10,6 +10,7 @@ import { AuthState } from '../types';
 import { AUTH } from '../redux/actions';
 import { LOGIN_USER, REGISTER_USER, GOOGLE_LOGIN } from '../graphql';
 import { GoogleLogin } from '@react-oauth/google';  // Import GoogleLogin component
+import '../../src/index.css' ;
 
 const initialState = { username: '', password: '', confirmPassword: '' };
 
@@ -44,7 +45,25 @@ const Auth = () => {
         const { data } = await registerMutation({ variables: { username: form.username, password: form.password, confirmPassword: form.confirmPassword } });
         setErrors(null);
         dispatch({ type: AUTH, payload: data.registerUser });
-        navigate(location?.state?.redirect || '/market')
+        dispatch({ type: OWNED_STOCKS, payload: {} });
+        navigate(location?.state?.redirect || '/market');
+      } catch (err: any) {
+        setErrors(err.message);
+        setIsLoading(false);
+      }
+    } else {
+      try {
+        const { data } = await loginMutation({ variables: { username: form.username, password: form.password } });
+        setErrors(null);
+        dispatch({ type: AUTH, payload: data.loginUser });
+
+        getOwnedStocks();
+
+        if (ownedStocksData) {
+          dispatch({ type: OWNED_STOCKS, payload: ownedStocksData.ownedStocks });
+        }
+
+        navigate(location?.state?.redirect || '/account');
       } catch (err: any) {
         setErrors(err.message);
         setIsLoading(false);
@@ -63,7 +82,7 @@ const Auth = () => {
       const { data } = await googleLoginMutation({ variables: { googleToken } });
       setErrors(null);
       dispatch({ type: AUTH, payload: data.googleLogin });
-      navigate('/account');
+      navigate('/market');
     } catch (error: any) {
       setErrors(error?.message || 'Google login failed');
     }
@@ -169,7 +188,7 @@ const Auth = () => {
               </div>
 
               {/* Google Login */}
-              <div className="mt-4">
+              <div className="mt-4 flex items-center justify-center">
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
                   onError={handleGoogleFailure}
