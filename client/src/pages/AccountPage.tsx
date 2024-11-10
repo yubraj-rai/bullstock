@@ -133,8 +133,8 @@ const AccountPage = () => {
     const initialTab = useMemo(() => {
         if (tabParam === 'transactions') return TabIndex.Transactions;
         if (tabParam === 'profile') return TabIndex.Profile;
-        const savedTab = sessionStorage.getItem(SESSION_KEYS.ACCOUNT_TAB);
-        return savedTab ? parseInt(savedTab) : TabIndex.Profile;
+       // const savedTab = sessionStorage.getItem(SESSION_KEYS.ACCOUNT_TAB);
+       // return savedTab ? parseInt(savedTab) : TabIndex.Profile;
     }, [tabParam]);
 
     const handleDeposit = () => {
@@ -204,8 +204,8 @@ const AccountPage = () => {
     };
 
     const handleTabChange = (index: number) => {
-        setSelectedTab(index);
-        sessionStorage.setItem(SESSION_KEYS.ACCOUNT_TAB, index.toString());
+       // setSelectedTab(index);
+       // sessionStorage.setItem(SESSION_KEYS.ACCOUNT_TAB, index.toString());
         
         // Update URL without refresh
         const tabName = index === TabIndex.Transactions ? 'transactions' : 'profile';

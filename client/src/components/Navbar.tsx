@@ -143,7 +143,7 @@ export default function NavBar() {
                                                     <Menu.Button
                                                         className={classNames(
                                                             isAuthenticated ? 'w-10' : 'w-auto',
-                                                            'transition-all h-10 sm:w-auto sm:h-10 text-sm sm:px-4 sm:py-2 sm:justify-around rounded-full outline-none border-none lg:w-48 flex justify-center items-center px-3 py-1 font-medium  hover:bg-opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-white bg-pink-600 focus-visible:ring-opacity-75 shadow-md'
+                                                            'transition-all h-10 display: inline-block  sm:w-auto sm:h-10 text-sm sm:px-4 sm:py-2 sm:justify-center rounded-full outline-none border-none flex justify-center items-center px-3 py-1 font-medium  hover:bg-opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-white bg-[#6dbfdd] focus-visible:ring-opacity-75 shadow-md'
                                                         )}
                                                         onClick={() => {
                                                             if (!isAuthenticated) {
@@ -213,7 +213,7 @@ export default function NavBar() {
                                         <button
                                             className={classNames(
                                                 isAuthenticated ? 'w-10' : 'w-auto',
-                                                'transition-all h-10 sm:w-auto sm:h-10 text-sm sm:px-4 sm:py-2 sm:justify-around rounded-full outline-none border-none lg:w-48 flex justify-center items-center px-3 py-1 font-medium  hover:bg-opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-white bg-[#219cd7] text-white focus-visible:ring-opacity-75 shadow-md'
+                                                'transition-all h-10 w-auto sm:h-10 text-sm sm:px-4 sm:py-2 sm:justify-around rounded-full outline-none border-none  flex justify-center items-center px-3 py-1 font-medium  hover:bg-opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-white bg-[#219cd7] text-white focus-visible:ring-opacity-75 shadow-md'
                                             )}
                                             onClick={() => {
                                                 handleLogin();
