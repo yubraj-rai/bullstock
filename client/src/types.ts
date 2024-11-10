@@ -1,4 +1,4 @@
-import { OwnedStock } from "./__generated__/graphql";
+import { OwnedStock } from "./_generated_/graphql";
 
 interface User {
     _id: string;

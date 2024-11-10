@@ -8,16 +8,20 @@ import mongoose from 'mongoose';
 import { Server } from 'socket.io';
 import schema from './graphql/schema';
 import { stopUpdatingStockPrices, updateStockPrices } from './socket/market';
+import axios from 'axios';
 
 
 dotenv.config();
 
 const app = express();
+const striperoutes = require('./middleware/stripe-route');
+
 
 // Middleware setup for handling JSON and URL-encoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: true, credentials: true }));
+app. use('/api/stripe', striperoutes);
 
 // Define the context interface for Apollo Server
 interface MyContext {
@@ -30,7 +34,17 @@ const server = new ApolloServer<MyContext>({ schema });
 const init = async () => {
     // Start the Apollo Server
     await server.start();
-
+    const handleToken = (totalAmount, token) => {
+        try {
+    axios.post("http://localhost:5000/api/stripe/pay", {
+      token: token.id,
+      amount: totalAmount
+    
+    });
+        }catch(error) {
+          console.log(error);
+        };
+      };
     // Set up GraphQL endpoint with Express middleware
     app.use(
         '/graphql',
