@@ -81,11 +81,11 @@ const init = async () => {
 
     io.on('connection', (socket) => {
         console.log('New client connected:', socket?.id);
-        updateStockPrices(2, 10000, io);
+        updateStockPrices(5000, io);
 
         socket.on('disconnect', () => {
             if (io.engine.clientsCount === 0) {
-                stopUpdatingStockPrices(2);
+                stopUpdatingStockPrices();
                 console.log('No users connected, stopped stock updates');
             }
         });

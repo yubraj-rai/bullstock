@@ -5,89 +5,123 @@ const finnhub = require('finnhub');
 
 // Setup the Finnhub client
 const api_key = finnhub.ApiClient.instance.authentications['api_key'];
-api_key.apiKey = process.env.FINNHUB_API_KEY; // Ensure you have set your API key
+api_key.apiKey = process.env.FINNHUB_API_KEY;
 const finnhubClient = new finnhub.DefaultApi();
 
 const refreshIntervalIds = {};
-let isRateLimited = false;
-let rateLimitResetTime = 0;
 
-// The list of stock tickers you want to monitor
+// Configurable update interval (in milliseconds)
+const DEFAULT_INTERVAL = 90000; // Update every 90 seconds
+const MAX_API_CALLS_PER_MINUTE = 60; // Finnhub API rate limit for free accounts
+const MIN_UPDATE_INTERVAL = 60000; // Minimum interval between updates for each ticker (60 seconds)
+const COOLDOWN_PERIOD = 3600000; // Cooldown period after all tickers are updated (120 seconds)
+
+// List of stock tickers to monitor
 const stockTickers = [
-    "AMC", "ADBE", "AMD", "BFH", "AMZN", "AAPL", "BAC", "BNS.TO", "BRK.A", "BB.TO", "BA",
-    "COST", "DELL", "FB", "FDX", "F", "GME", "GOOGL", "HD", "INTC", "IBM", "LYFT", "MTCH",
-    "MCD", "MSFT", "NVDA", "NFLX", "NKE", "PYPL", "HOOD", "RY.TO", "SHOP", "SPOT", "TSLA",
-    "TD.TO", "UBER", "UPS", "VZ", "V", "WMT", "DIS"
+    "AAPL", "MSFT", "GOOGL", "AMZN", "META", "TSLA", "BRK.B", "JPM", "V", "WMT",
+    "JNJ", "PG", "MA", "UNH", "HD", "NVDA", "DIS", "BAC", "XOM", "COST",
+    "KO", "PEP", "CSCO", "ADBE", "NFLX", "MCD", "INTC", "CRM", "VZ", "T",
+    "IBM", "ORCL", "NKE", "AMD", "GE", "BA", "CAT", "MMM", "UPS", "FDX",
+    "SBUX", "GM", "F"
 ];
 
-export const updateStockPrices = async (id: number, interval: number, io?: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) => {
-    if (!refreshIntervalIds[id]) {
-        console.log(`Started updating all stocks from Finnhub API ${io ? 'with' : 'without'} socket emits every ${interval / 1000} seconds`);
+// Track the last update time for each ticker
+const lastUpdateTimes = {};
 
-        // Set up the interval to update stock prices
-        refreshIntervalIds[id] = setInterval(async () => {
-            if (isRateLimited) {
-                const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-                if (currentTime >= rateLimitResetTime) {
-                    isRateLimited = false; // Reset rate limit flag
-                } else {
-                    console.log(`Rate limit reached. Waiting until ${new Date(rateLimitResetTime * 1000).toLocaleString()} to retry.`);
-                    return; // Exit early if rate-limited
-                }
-            }
+// Track the number of API calls made in the current minute
+let apiCallCount = 0;
 
+// Timestamp of the last API call
+let lastApiCallTime = Date.now();
+
+export const updateStockPrices = async (interval = DEFAULT_INTERVAL, io?: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>) => {
+    // Start updating stock prices if not already running
+    if (!refreshIntervalIds['stockUpdater']) {
+        console.log(`Started updating stocks ${io ? 'with' : 'without'} socket emits every ${interval / 1000} seconds`);
+
+        refreshIntervalIds['stockUpdater'] = setInterval(async () => {
             try {
                 const updatedStocks = [];
+                const batchSize = Math.min(stockTickers.length, MAX_API_CALLS_PER_MINUTE);
 
-                // Fetching stock data in batches of 10 stocks
-                for (let i = 0; i < stockTickers.length; i += 10) {
-                    const batchTickers = stockTickers.slice(i, i + 10);
+                // Process stock data in batches to respect the API rate limit
+                for (let i = 0; i < stockTickers.length; i += batchSize) {
+                    const batchTickers = stockTickers.slice(i, i + batchSize);
+
+                    // Check if the rate limit has been reached
+                    if (apiCallCount >= MAX_API_CALLS_PER_MINUTE) {
+                        const timeSinceLastCall = Date.now() - lastApiCallTime;
+                        const waitTime = 60000 - timeSinceLastCall; // Time to wait in milliseconds
+                        console.log(`API rate limit reached. Waiting for ${waitTime / 1000} seconds.`);
+                        await new Promise(resolve => setTimeout(resolve, waitTime));
+                        apiCallCount = 0; // Reset the API call count
+                    }
 
                     await Promise.all(batchTickers.map(ticker => {
                         return new Promise<void>((resolve, reject) => {
-                            finnhubClient.quote(ticker, async (error, data, response) => {
-                                if (error) {
-                                    console.error(`Error fetching price for ${ticker}:`, error);
-                                    if (error.response?.status === 429) {
-                                        isRateLimited = true;
-                                        rateLimitResetTime = error.response.headers['x-ratelimit-reset'];
-                                    }
-                                    return reject(error);
-                                }
-
-                                if (data && data.c !== undefined) {
-                                    const price = data.c; 
-
-                                    try {
-                                        // Update the database with the new price
-                                        await Stock.findOneAndUpdate(
-                                            { ticker },
-                                            { price: parseFloat(price.toFixed(2)) }
-                                        );
-                                        console.log(`Database updated successfully for ${ticker}`);
-                                    } catch (dbError) {
-                                        console.error(`Error updating database for ${ticker}:`, dbError);
+                            // Check if the ticker needs to be updated
+                            const now = Date.now();
+                            const lastUpdateTime = lastUpdateTimes[ticker] || 0;
+                            if (now - lastUpdateTime >= MIN_UPDATE_INTERVAL) {
+                                finnhubClient.quote(ticker, async (error, data) => {
+                                    if (error) {
+                                        console.error(`Error fetching price for ${ticker}:`, error);
+                                        return reject(error);
                                     }
 
-                                    updatedStocks.push({ ticker, price: parseFloat(price.toFixed(2)) });
+                                    if (data && data.c !== undefined) {
+                                        const price = parseFloat(data.c.toFixed(2));
 
-                                    const sendDelay = Math.random() * (5000 - 1500) + 1500;
-                                    socketEmit(io, sendDelay, ticker, {
-                                        price: parseFloat(price.toFixed(2)),
-                                    });
+                                        try {
+                                            // Update the database with the new price
+                                            await Stock.findOneAndUpdate(
+                                                { ticker },
+                                                { price }
+                                            );
+                                            console.log(`Database updated for ${ticker} with price: ${price}`);
+                                            updatedStocks.push({ ticker, price });
 
-                                    console.log(`Updated ${ticker} to price: ${price}`);
-                                    resolve(); 
-                                } else {
-                                    console.warn(`No data received for ${ticker}`);
-                                    resolve();
-                                }
-                            });
+                                            // Emit to Socket.io with a slight delay
+                                            const sendDelay = Math.random() * (5000 - 1500) + 1500;
+                                            socketEmit(io, sendDelay, ticker, { price });
+
+                                            // Update the last update time for the ticker
+                                            lastUpdateTimes[ticker] = now;
+                                        } catch (dbError) {
+                                            console.error(`Error updating database for ${ticker}:`, dbError);
+                                        }
+
+                                        resolve();
+                                    } else {
+                                        console.warn(`No data received for ${ticker}`);
+                                        resolve();
+                                    }
+                                });
+                            } else {
+                                resolve(); // Skip updating this ticker
+                            }
                         });
                     }));
+
+                    // Update the API call count and timestamp
+                    apiCallCount += batchTickers.length;
+                    lastApiCallTime = Date.now();
+
+                    // Wait for one second after each batch to comply with rate limits
+                    await new Promise(resolve => setTimeout(resolve, 1000));
                 }
 
-                console.log(`Finished updating ${updatedStocks.length} stocks`);
+                console.log(`Finished updating ${updatedStocks.length} stocks.`);
+
+                // Check if all tickers have been updated
+                if (Object.keys(lastUpdateTimes).length === stockTickers.length) {
+                    console.log(`All tickers updated. Waiting for ${COOLDOWN_PERIOD / 1000} seconds before next update.`);
+                    await new Promise(resolve => setTimeout(resolve, COOLDOWN_PERIOD));
+                    // Reset the last update times
+                    Object.keys(lastUpdateTimes).forEach(ticker => {
+                        lastUpdateTimes[ticker] = 0;
+                    });
+                }
             } catch (error) {
                 console.error("Error processing stock data:", error);
             }
@@ -95,9 +129,10 @@ export const updateStockPrices = async (id: number, interval: number, io?: Serve
     }
 };
 
-export const stopUpdatingStockPrices = (id: number) => {
-    clearInterval(refreshIntervalIds[id]);
-    refreshIntervalIds[id] = null;
+export const stopUpdatingStockPrices = () => {
+    clearInterval(refreshIntervalIds['stockUpdater']);
+    refreshIntervalIds['stockUpdater'] = null;
+    console.log('Stopped updating stock prices.');
 };
 
 const socketEmit = (io, sendDelay, to, value) => {
