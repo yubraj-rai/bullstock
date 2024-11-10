@@ -19,7 +19,7 @@ import { AUTH, OWNED_STOCKS } from './redux/actions';
 import StockPage from './pages/StockPage';
 import socket from './socket';
 import axios from 'axios';
-import Stripe from 'react-stripe-checkout';
+// import Stripe from 'react-stripe-checkout';
 import NewsPage from './pages/NewsPage';
 import AccountPage from './pages/AccountPage';
 
@@ -30,27 +30,27 @@ function App() {
     const dispatch = useDispatch();
     const location = useLocation();
 
-    const handleToken = (totalAmount, token) => {
-        try {
-            axios.post("http://localhost:5000/api/stripe/pay", {
-                token: token.id,
-                amount: totalAmount
-            });
-        } catch (error) {
-            console.log(error);
-        }
-    };
+    // const handleToken = (totalAmount, token) => {
+    //     try {
+    //         axios.post("http://localhost:5000/api/stripe/pay", {
+    //             token: token.id,
+    //             amount: totalAmount
+    //         });
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // };
 
-    const tokenHandler = (token) => {
-        handleToken(1000, token); 
-    };
-    useEffect(() => {
-        // Check for stored profile on app initialization
-        const profile = localStorage.getItem('profile');
-        if (profile) {
-            dispatch({ type: AUTH, payload: JSON.parse(profile) });
-        }
-    }, [dispatch]);
+    // const tokenHandler = (token) => {
+    //     handleToken(1000, token); 
+    // };
+    // useEffect(() => {
+    //     // Check for stored profile on app initialization
+    //     const profile = localStorage.getItem('profile');
+    //     if (profile) {
+    //         dispatch({ type: AUTH, payload: JSON.parse(profile) });
+    //     }
+    // }, [dispatch]);
 
     useEffect(() => {
         verifyUser();
@@ -111,12 +111,12 @@ function App() {
                     />
                 </Routes>
 
-                <div>
+                {/* <div>
                     <Stripe
                         stripeKey="pk_test_51QFejRD5fVcCMFTPPfY3M1VyzywDA0fTQfKOgPsaNcAx5L9m7lpxFZs3uAewxthsSs28vDPn2lpXEcb7EFwFqBLb00sKLbu0LO"
                         token={tokenHandler}
                     />
-                </div>
+                </div> */}
 
                 {location.pathname !== '/news' && <Footer />}
             </ScrollToTop>

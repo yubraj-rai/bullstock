@@ -1,4 +1,4 @@
-import { AUTH, LOGOUT, UPDATE_USERNAME } from '../actions';
+import { AUTH, LOGOUT, UPDATE_USERNAME, UPDATE_BALANCE } from '../actions';
 
 const authReducer = (state = { authData: null }, action: any) => {
     switch (action.type) {
@@ -11,6 +11,10 @@ const authReducer = (state = { authData: null }, action: any) => {
         case UPDATE_USERNAME:
             const profile = JSON.parse(localStorage.getItem('profile') || '{}');
             profile.user.username = action?.payload.newUsername;
+            localStorage.setItem('profile', JSON.stringify(profile));
+            return { ...state, authData: profile };
+        case UPDATE_BALANCE:
+            profile.user.balance = action?.payload.newBalance;
             localStorage.setItem('profile', JSON.stringify(profile));
             return { ...state, authData: profile };
         default:
