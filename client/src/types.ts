@@ -1,48 +1,51 @@
 import { OwnedStock } from "./__generated__/graphql";
 
-interface User {
-    _id: string;
-    username: string;
-    balance: number;
-}
-
-interface AuthData {
-    user: User;
-    token: string;
-}
-
-interface AuthReducer {
-    authData: AuthData;
-}
-
-interface AuthState {
-    authReducer: AuthReducer;
-}
-
 interface Stock {
-    ticker: string;
-    name: string;
-    price: number;
-    exchange: string;
-    industry: string;
-    logo: string;
-    ipo: string;
-    country: string;
-    currency: string;
-    weburl: string;
+  ticker: string;
+  name: string;
+  price: number;
+  exchange: string;
+  industry: string;
+  logo: string;
+  ipo: string;
+  country: string;
+  currency: string;
+  weburl: string;
+}
+
+interface User {
+  _id: string;
+  username: string;
+  balance: number;
 }
 
 interface StockUpdate {
-    price: number;
+  price: number;
+}
+
+interface StockState {
+  stocksReducer: StockUpdate;
+}
+
+interface AuthData {
+  user: User;
+  token: string;
+}
+
+interface AuthReducer {
+  authData: AuthData;
+}
+
+interface AuthState {
+  authReducer: AuthReducer;
 }
 
 interface OwnedStocksReducer {
-    ownedStocks: OwnedStock[];
+  ownedStocks: OwnedStock[];
 }
 
 interface OwnedStocksState {
-    ownedStocksReducer: OwnedStocksReducer;
+  ownedStocksReducer: OwnedStocksReducer;
 }
 
-
-export type { AuthState, Stock, StockUpdate, OwnedStocksState};
+export type { Stock, StockUpdate, StockState, AuthState, OwnedStocksState };

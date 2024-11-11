@@ -161,7 +161,7 @@ export default function StockPage({ ticker }: Props) {
 
                             <div className='mt-6 mb-2 text-gray-700 dark:text-gray-200 text-center sm:block'>
                                 <button
-                                    className='w-full px-20 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-200 transform bg-blue-500 rounded-md dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none focus:bg-blue-500 dark:focus:bg-blue-600'
+                                    className='w-full px-20 py-2 font-medium tracking-wide text-white capitalize transition-colors duration-200 transform transform bg-[#6dbfdd] rounded-md hover:bg-[#5ba3c2] dark:hover:bg-blue-700 focus:outline-none focus:bg-blue-500 dark:focus:bg-blue-600'
                                     type='button'
                                     onClick={toggleModal}>
                                     Buy{ownedStock && ' / Sell'}

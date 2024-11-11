@@ -1,4 +1,4 @@
-import { Stock } from '../../__generated__/graphql';
+import { Stock } from '../../_generated_/graphql';
 import { OWNED_STOCKS, UPDATE_STOCK } from '../actions';
 
 const ownedStocksReducer = (state = { ownedStocks: [] }, action: any) => {

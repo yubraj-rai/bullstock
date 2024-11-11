@@ -1,11 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
-import { BUY_STOCK, SELL_STOCK } from '../graphql';
-import { useDispatch, useSelector } from 'react-redux';
-import { UPDATE_BALANCE, UPDATE_STOCK } from '../redux/actions';
-import { Switch } from '@headlessui/react';
-import { useMutation } from '@apollo/client';
-import checkIcon from '../assets/icons/checked.png';
-import { AuthState } from '../types';
+import { useEffect, useRef, useState } from "react";
+import { BUY_STOCK, SELL_STOCK } from "../graphql";
+import { useDispatch, useSelector } from "react-redux";
+import { UPDATE_BALANCE, UPDATE_STOCK } from "../redux/actions";
+import { Switch } from "@headlessui/react";
+import { useMutation } from "@apollo/client";
+import checkIcon from "../assets/icons/checked.png";
+import { AuthState } from "../types";
 
 interface Props {
     id: string;
