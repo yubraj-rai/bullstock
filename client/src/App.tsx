@@ -17,7 +17,12 @@ import { useDispatch } from 'react-redux';
 import { VERIFY_USER, GET_OWNEDSTOCKS } from './graphql';
 import { AUTH, OWNED_STOCKS } from './redux/actions';
 import StockPage from './pages/StockPage';
+import PortfolioPage from './pages/PortfolioPage';
+import ProtectedRoute from './components/ProtectedRoute';
 import NewsPage from './pages/NewsPage';
+import AccountPage from './pages/AccountPage';
+
+
 
 function App() {
     const [getOwnedStocks, { data: ownedStocksData, loading: ownedStockLoading }] = useLazyQuery(GET_OWNEDSTOCKS);
@@ -58,6 +63,25 @@ function App() {
                     <Route path='/reset' element={<ResetPasswordPage />} />
                     <Route path='/news' element={<NewsPage />} />
                     <Route path='/stock/:ticker' element={<StockPage ticker={useLocation().pathname.replace('/stock/', '')} />} />
+
+                    <Route
+                        path='/portfolio'
+                        element={
+                            <ProtectedRoute>
+                                <PortfolioPage />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path='/account'
+                        element={
+                            <ProtectedRoute>
+                                <AccountPage />
+                            </ProtectedRoute>
+                        }
+                    />
+
                 </Routes>
                 {location.pathname !== '/news' && <Footer />}
             </ScrollToTop>
