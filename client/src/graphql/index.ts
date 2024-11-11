@@ -117,6 +117,36 @@ export const GET_OWNEDSTOCKS = gql(`
   }
 `);
 
+export const GET_TRANSACTIONS = gql(`
+    query GetTransactions {
+        transactions {
+            userId
+            type
+            ticker
+            shares
+            totalAmount
+            stockPrice
+            date
+        }
+    }
+`);
+
+export const DEPOSIT = gql(`
+    mutation Deposit($amount: Float!) {
+        deposit(amount: $amount) {
+            newBalance
+        }
+    }
+`);
+
+export const WITHDRAW = gql(`
+    mutation Withdraw($amount: Float!) {
+        withdraw(amount: $amount) {
+            newBalance
+        }
+    }
+`);
+
 export const BUY_STOCK = gql(`
   mutation BuyStock($ticker: String!, $shares: Int!) {
       buyStock(ticker: $ticker, shares: $shares) {
@@ -176,3 +206,5 @@ export const GET_MARKET_NEWS = gql`
         }
     }
 `;
+
+

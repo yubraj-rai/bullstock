@@ -19,12 +19,52 @@ async function clearFirstTransaction(userId) {
 export const OwnedStockResolver = {
     Query: {
         ownedStocks: async (_, args, context) => {
-            // Placeholder resolver for ownedStocks query
-            return []; // Returning an empty array
+            const { token } = context;
+
+            const result = await verifyToken(token);
+
+            if (result.error) {
+                throw new GraphQLError(result.error, {
+                    extensions: {
+                        code: 'UNAUTHORIZED',
+                    },
+                });
+            }
+
+            console.log("user id: " + result.userId) ;
+            const ownedStocks = await OwnedStock.find({ userId: result.userId }).sort({ ['userId']: 1 });
+
+            const stockData = [];
+
+            for (const stock of ownedStocks) {
+                const stockInfo = await Stock.findOne({ ticker: stock.ticker });
+                stockData.push(stockInfo);
+            }
+
+            const merged = ownedStocks.map((stock, index) => {
+                return { ...stock.toJSON(), ...stockData[index]._doc };
+            })
+
+            return merged;
         },
         ownedStock: async (_, { ticker }, context) => {
-            // Placeholder resolver for ownedStock query
-            return null; // Returning null
+            const { token } = context;
+
+            const result = await verifyToken(token);
+
+            if (result.error) {
+                throw new GraphQLError(result.error, {
+                    extensions: {
+                        code: 'UNAUTHORIZED',
+                    },
+                });
+            }
+            
+            console.log("user ids: " + result.userId) ;
+
+            const ownedStock = await OwnedStock.find({ userId: result.userId, ticker });
+
+            return ownedStock;
         },
     },
     Mutation: {
