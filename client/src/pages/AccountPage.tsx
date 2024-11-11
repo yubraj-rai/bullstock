@@ -31,7 +31,7 @@ const AccountPage = () => {
 
     useEffect(() => {
         if (auth) {
-            document.title = auth?.user?.username + ' | Stocks.io';
+            document.title = auth?.user?.username + ' | Bullstock';
         }
     }, [auth]);
 

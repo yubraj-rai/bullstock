@@ -185,5 +185,4 @@ export const OwnedStockResolver = {
             return { ownedStock: result, newBalance: user.balance };
         },
     },
-}
-
+};
