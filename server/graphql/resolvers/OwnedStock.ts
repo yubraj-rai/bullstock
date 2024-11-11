@@ -4,6 +4,8 @@ import { User } from '../../models/User';
 import { verifyToken } from '../../middleware/auth';
 import { Stock } from '../../models/Stock';
 import { GraphQLError } from 'graphql';
+const { sendEmail } = require('./mailer');
+
 
 async function clearFirstTransaction(userId) {
     try {
@@ -102,9 +104,33 @@ export const OwnedStockResolver = {
 
                 const newTransaction = new Transaction({ userId: authResult.userId, type: 'BUY', ticker, shares, totalAmount: cost, stockPrice: stock.price });
                 await newTransaction.save();
-
-                clearFirstTransaction(authResult.userId);
-                return { ownedStock, price: stock.price, newBalance: user.balance - cost };
+                const subject = `Stock Purchase Confirmation: ${ticker}`;
+                const html = `
+                    <html>
+                        <body style="font-family: Arial, sans-serif; line-height: 1.6; background-color: #f4f4f4; padding: 20px;">
+                            <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                                <h2 style="color: #333;">Purchase Confirmation</h2>
+                                <p style="color: #555;">Dear User,</p>
+                                <p style="color: #555;">You have successfully purchased <strong>${shares} shares</strong> of <strong>${ticker}</strong>.</p>
+                                <p style="color: #555;">Here are the details of your transaction:</p>
+                                <ul style="color: #555; list-style-type: none; padding: 0;">
+                                    <li><strong>Price per Share:</strong> $${stock.price.toFixed(2)}</li>
+                                    <li><strong>Total Cost:</strong> $${cost.toFixed(2)}</li>
+                                    <li><strong>New Balance:</strong> $${(user.balance - cost).toFixed(2)}</li>
+                                </ul>
+                                <p style="color: #555;">Thank you for choosing our service. If you have any questions, feel free to reach out to our support team.</p>
+                                <footer style="margin-top: 20px; font-size: 0.8em; color: #999;">
+                                    <p>Best Regards,<br>BullStocks</p>
+                                </footer>
+                            </div>
+                        </body>
+                    </html>
+                `;
+            // const text = `You have successfully purchased ${shares} shares of ${ticker} at $${stock.price} each. Your total cost is $${cost}. Your new balance is $${user.balance - cost}.`;
+            await sendEmail(user.username, subject, html);
+            clearFirstTransaction(authResult.userId);
+            
+            return { ownedStock, price: stock.price, newBalance: user.balance - cost };
             } else {
                 const newOwnedStock = new OwnedStock({
                     userId: authResult.userId,
@@ -181,6 +207,32 @@ export const OwnedStockResolver = {
             const user = await User.findOneAndUpdate({ _id: authResult.userId }, { $inc: { balance: profit } }, { new: true });
 
             clearFirstTransaction(authResult.userId);
+            // Prepare email content
+            const subject = `Stock Sale Confirmation: ${ticker}`;
+            const html = `
+                <html>
+                    <body style="font-family: Arial, sans-serif; line-height: 1.6; background-color: #f4f4f4; padding: 20px;">
+                        <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                            <h2 style="color: #333;">Sale Confirmation</h2>
+                            <p style="color: #555;">Dear User,</p>
+                            <p style="color: #555;">You have successfully sold <strong>${shares} shares</strong> of <strong>${ticker}</strong>.</p>
+                            <p style="color: #555;">Here are the details of your transaction:</p>
+                            <ul style="color: #555; list-style-type: none; padding: 0;">
+                                <li><strong>Price per Share:</strong> $${stock.price.toFixed(2)}</li>
+                                <li><strong>Total Profit:</strong> $${profit.toFixed(2)}</li>
+                                <li><strong>New Balance:</strong> $${user.balance.toFixed(2)}</li>
+                            </ul>
+                            <p style="color: #555;">Thank you for choosing our service. If you have any questions, feel free to reach out to our support team.</p>
+                            <footer style="margin-top: 20px; font-size: 0.8em; color: #999;">
+                                <p>Best Regards,<br>BullStocks</p>
+                            </footer>
+                        </div>
+                    </body>
+                </html>
+            `;
+        
+            // Send the email notification
+            await sendEmail(user.username, subject, html);
 
             return { ownedStock: result, newBalance: user.balance };
         },

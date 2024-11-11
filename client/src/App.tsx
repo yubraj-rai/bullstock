@@ -22,6 +22,8 @@ import axios from 'axios';
 // import Stripe from 'react-stripe-checkout';
 import NewsPage from './pages/NewsPage';
 import AccountPage from './pages/AccountPage';
+import PortfolioPage from './pages/PortfolioPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 
 function App() {
@@ -103,10 +105,22 @@ function App() {
                     <Route path='/reset' element={<ResetPasswordPage />} />
                     <Route path='/stock/:ticker' element={<StockPage ticker={useLocation().pathname.replace('/stock/', '')} />} />
                     <Route path='/news' element={<NewsPage />} />
+
+                    <Route
+                        path='/portfolio'
+                        element={
+                            <ProtectedRoute>
+                                <PortfolioPage />
+                            </ProtectedRoute>
+                        }
+                    />
+
                     <Route
                         path='/account'
                         element={
+                            <ProtectedRoute>
                                 <AccountPage />
+                            </ProtectedRoute>
                         }
                     />
                 </Routes>
