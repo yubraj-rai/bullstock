@@ -26,7 +26,22 @@ export const OtpResolver = {
             from: 'hirakpatel0801@gmail.com',
             to: username,
             subject: 'Your OTP Code',
-            text: `Your OTP code is ${otp}`
+            html: `
+              <html>
+                  <body style="font-family: Arial, sans-serif; line-height: 1.6; background-color: #f4f4f4; padding: 20px;">
+                      <div style="max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                          <h2 style="color: #333;">Your OTP Code</h2>
+                          <p style="color: #555;">Dear User,</p>
+                          <p style="color: #555;">To Proceed To Reset Your Password, please use the following OTP:</p>
+                          <h3 style="color: #007BFF; font-weight: bold;">${otp}</h3>
+                          <p style="color: #555;">This OTP is valid for <strong>15 minutes</strong>. If you did not request this, please ignore this email.</p>
+                          <footer style="margin-top: 20px; font-size: 0.8em; color: #999;">
+                              <p>Thank you,<br>BullStocks</p>
+                          </footer>
+                      </div>
+                  </body>
+              </html>
+          `,
         };
         await transporter.sendMail(mailOptions);
         
