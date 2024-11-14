@@ -153,6 +153,8 @@ export const BUY_STOCK = gql(`
               ticker
               shares
               initialInvestment
+              logo
+              price
           }
           newBalance
       }
@@ -203,3 +205,15 @@ export const GET_MARKET_NEWS = gql`
         }
     }
 `;
+
+// export const GET_MARKET_NEWS = gql`
+//     query GetMarketNews($limit: Int!, $offset: Int!) {
+//         getMarketNews(limit: $limit, offset: $offset) {
+//             title
+//             description
+//             url
+//             imageUrl
+//             publishedAt
+//         }
+//     }
+// `;

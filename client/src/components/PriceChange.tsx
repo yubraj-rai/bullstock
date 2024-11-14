@@ -56,7 +56,7 @@ const PriceChange = React.memo(({ currentPrice, prevPrice, currency, hideChange 
             <span className='font-semibold'>
                 {new Intl.NumberFormat('en-US', {
                     style: 'currency',
-                    currency,
+                    currency: currency ? currency : 'USD',
                 }).format(currentPrice)}
             </span>
             {!hideChange && (
