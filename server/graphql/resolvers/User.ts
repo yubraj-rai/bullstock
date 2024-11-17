@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { GraphQLError } from 'graphql';
 import bcrypt from 'bcryptjs';
 import { validateLoginInput, validateRegisterInput } from '../../utils/AuthValidator';
-
+import {verifyGoogleToken} from '../../utils/googleAuth' ;
 const generateToken = (user) => {
     return jwt.sign(
         {
@@ -19,7 +19,7 @@ export const UserResolver = {
     Mutation: {
         registerUser: async (_, { username, password, confirmPassword }) => {
             const { valid, errors } = validateRegisterInput(username, password, confirmPassword);
-      
+     
             if (!valid) {
               throw new GraphQLError(errors, {
                 extensions: {
@@ -85,6 +85,27 @@ export const UserResolver = {
 
             return { user, token };
         },
+        googleLogin: async (_, { googleToken }) => {
+            try {
+                const { email, name } = await verifyGoogleToken(googleToken);
+                let user = await User.findOne({ username: email });
+        
+                if (!user) {
+                    user = new User({
+                        username: email,
+                        googleId: googleToken,
+                        isVerified: true,
+                    });
+                    await user.save();
+                }
+        
+                const token = generateToken(user);
+                return { user, token };
+            } catch (error) {
+                console.error("Google login error:", error);
+                return null;
+            }
+        },        
         deposit: async (_, { amount }, context) => {
             // Placeholder resolver for deposit operation
             return null; // Returning null as a placeholder

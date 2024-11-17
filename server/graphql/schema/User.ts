@@ -4,9 +4,7 @@ export const UserTypeDef = `#graphql
     type User {
         _id: String!
         username: String!
-        email: String!
         password: String!
-        authProvider: String!
         createdAt: Date!
         updatedAt: Date!
         balance: Float!
@@ -37,5 +35,9 @@ export const UserTypeDef = `#graphql
         deposit(amount: Float!): balanceResponse!
         withdraw(amount: Float!): balanceResponse!
         changeUsername(newUsername: String!, confirmPassword: String!): usernameChangeResponse!
-    }
+        googleLogin(googleToken: String!): UserResponse
+        sendOtp(username: String!): String
+        verifyOtp(username: String!, otp: String!): String
+        resetPassword(username: String!, password: String!, confirmPassword: String!): String
+}
 `;

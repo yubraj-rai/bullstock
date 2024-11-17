@@ -1,11 +1,15 @@
-import { MarketNews } from '../../models/MarketNews';
+import { fetchAndStoreNews } from '../../utils/fetchAndStoreNews';
 
 export const marketNewsResolvers = {
     Query: {
-      // Resolver to get the latest market news
-      getLatestMarketNews: async (_: any, { limit }: { limit: number }) => {
-        // Implementation will go here
-      },
+        async getMarketNews() {
+            try {
+                const news = await fetchAndStoreNews();
+                return news;
+            } catch (error) {
+                console.error('Error in getMarketNews resolver:', error);
+                return [];
+            }
+        },
     },
-  };
-  
+};

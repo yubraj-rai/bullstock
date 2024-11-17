@@ -1,0 +1,602 @@
+[
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1e1"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NASDAQ",
+    "industry": "Technology",
+    "ipo": "1980-12-12",
+    "logo": "https://logo.clearbit.com/apple.com",
+    "name": "Apple Inc.",
+    "price": 222.91,
+    "ticker": "AAPL",
+    "weburl": "https://www.apple.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1e3"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NASDAQ",
+    "industry": "Technology",
+    "ipo": "2004-08-19",
+    "logo": "https://logo.clearbit.com/google.com",
+    "name": "Alphabet Inc.",
+    "price": 145.86,
+    "ticker": "GOOGL",
+    "weburl": "https://www.abc.xyz"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1e8"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Financials",
+    "ipo": "1980-05-09",
+    "logo": "https://logo.clearbit.com/jpmorganchase.com",
+    "name": "JPMorgan Chase & Co.",
+    "price": 141.22,
+    "ticker": "JPM",
+    "weburl": "https://www.jpmorganchase.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1e9"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Financials",
+    "ipo": "2008-03-19",
+    "logo": "https://logo.clearbit.com/visa.com",
+    "name": "Visa Inc.",
+    "price": 225.5,
+    "ticker": "V",
+    "weburl": "https://www.visa.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1ea"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Retail",
+    "ipo": "1970-08-25",
+    "logo": "https://logo.clearbit.com/walmart.com",
+    "name": "Walmart Inc.",
+    "price": 139.13,
+    "ticker": "WMT",
+    "weburl": "https://www.walmart.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1eb"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Pharmaceuticals",
+    "ipo": "1944-09-24",
+    "logo": "https://logo.clearbit.com/jnj.com",
+    "name": "Johnson & Johnson",
+    "price": 165,
+    "ticker": "JNJ",
+    "weburl": "https://www.jnj.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1ec"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Consumer Goods",
+    "ipo": "1929-01-13",
+    "logo": "https://logo.clearbit.com/pg.com",
+    "name": "Procter & Gamble",
+    "price": 150.75,
+    "ticker": "PG",
+    "weburl": "https://www.pg.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1ed"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Financial Services",
+    "ipo": "2006-05-25",
+    "logo": "https://logo.clearbit.com/mastercard.com",
+    "name": "Mastercard Incorporated",
+    "price": 377.87,
+    "ticker": "MA",
+    "weburl": "https://www.mastercard.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1ee"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Healthcare",
+    "ipo": "1984-11-13",
+    "logo": "https://logo.clearbit.com/unitedhealthgroup.com",
+    "name": "UnitedHealth Group",
+    "price": 484.42,
+    "ticker": "UNH",
+    "weburl": "https://www.unitedhealthgroup.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1ef"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Retail",
+    "ipo": "1981-09-22",
+    "logo": "https://logo.clearbit.com/homedepot.com",
+    "name": "The Home Depot",
+    "price": 340.5,
+    "ticker": "HD",
+    "weburl": "https://www.homedepot.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1f0"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NASDAQ",
+    "industry": "Semiconductors",
+    "ipo": "1999-01-22",
+    "logo": "https://logo.clearbit.com/nvidia.com",
+    "name": "NVIDIA Corporation",
+    "price": 649.57,
+    "ticker": "NVDA",
+    "weburl": "https://www.nvidia.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1f1"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Entertainment",
+    "ipo": "1957-10-06",
+    "logo": "https://logo.clearbit.com/disney.com",
+    "name": "The Walt Disney Company",
+    "price": 182.1,
+    "ticker": "DIS",
+    "weburl": "https://www.disney.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1f2"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Banking",
+    "ipo": "1984-07-01",
+    "logo": "https://upload.wikimedia.org/wikipedia/commons/2/20/Bank_of_America_logo.svg",
+    "name": "Bank of America Corporation",
+    "price": 41.76,
+    "ticker": "BAC",
+    "weburl": "https://www.bankofamerica.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1f3"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Energy",
+    "ipo": "1920-10-25",
+    "logo": "https://logo.clearbit.com/exxonmobil.com",
+    "name": "Exxon Mobil Corporation",
+    "price": 115.25,
+    "ticker": "XOM",
+    "weburl": "https://corporate.exxonmobil.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1f4"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NASDAQ",
+    "industry": "Retail",
+    "ipo": "1985-12-05",
+    "logo": "https://logo.clearbit.com/costco.com",
+    "name": "Costco Wholesale Corporation",
+    "price": 550.92,
+    "ticker": "COST",
+    "weburl": "https://www.costco.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1f5"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Beverages",
+    "ipo": "1919-09-05",
+    "logo": "https://logo.clearbit.com/coca-cola.com",
+    "name": "The Coca-Cola Company",
+    "price": 64.91,
+    "ticker": "KO",
+    "weburl": "https://www.coca-cola.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1f6"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NASDAQ",
+    "industry": "Beverages",
+    "ipo": "1965-01-01",
+    "logo": "https://logo.clearbit.com/pepsico.com",
+    "name": "PepsiCo, Inc.",
+    "price": 165.3,
+    "ticker": "PEP",
+    "weburl": "https://www.pepsico.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1f7"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NASDAQ",
+    "industry": "Technology",
+    "ipo": "1990-03-01",
+    "logo": "https://logo.clearbit.com/cisco.com",
+    "name": "Cisco Systems, Inc.",
+    "price": 50.6,
+    "ticker": "CSCO",
+    "weburl": "https://www.cisco.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1f8"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NASDAQ",
+    "industry": "Technology",
+    "ipo": "1986-08-13",
+    "logo": "https://logo.clearbit.com/adobe.com",
+    "name": "Adobe Inc.",
+    "price": 490.12,
+    "ticker": "ADBE",
+    "weburl": "https://www.adobe.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1f9"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NASDAQ",
+    "industry": "Entertainment",
+    "ipo": "2002-05-23",
+    "logo": "https://logo.clearbit.com/netflix.com",
+    "name": "Netflix, Inc.",
+    "price": 348.16,
+    "ticker": "NFLX",
+    "weburl": "https://www.netflix.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1fa"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Food & Beverage",
+    "ipo": "1980-03-01",
+    "logo": "https://logo.clearbit.com/mcdonalds.com",
+    "name": "McDonald's Corporation",
+    "price": 267.95,
+    "ticker": "MCD",
+    "weburl": "https://www.mcdonalds.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1fb"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NASDAQ",
+    "industry": "Semiconductors",
+    "ipo": "1971-10-13",
+    "logo": "https://logo.clearbit.com/intel.com",
+    "name": "Intel Corporation",
+    "price": 56.02,
+    "ticker": "INTC",
+    "weburl": "https://www.intel.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1fc"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Software",
+    "ipo": "2004-06-23",
+    "logo": "https://logo.clearbit.com/salesforce.com",
+    "name": "Salesforce, Inc.",
+    "price": 227.15,
+    "ticker": "CRM",
+    "weburl": "https://www.salesforce.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1fd"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Telecommunications",
+    "ipo": "1983-11-01",
+    "logo": "https://logo.clearbit.com/verizon.com",
+    "name": "Verizon Communications Inc.",
+    "price": 55.12,
+    "ticker": "VZ",
+    "weburl": "https://www.verizon.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1fe"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Telecommunications",
+    "ipo": "1984-07-09",
+    "logo": "https://logo.clearbit.com/att.com",
+    "name": "AT&T Inc.",
+    "price": 29.44,
+    "ticker": "T",
+    "weburl": "https://www.att.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1ff"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Technology",
+    "ipo": "1911-06-16",
+    "logo": "https://logo.clearbit.com/ibm.com",
+    "name": "International Business Machines Corporation",
+    "price": 140.3,
+    "ticker": "IBM",
+    "weburl": "https://www.ibm.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb200"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Technology",
+    "ipo": "1986-03-12",
+    "logo": "https://logo.clearbit.com/oracle.com",
+    "name": "Oracle Corporation",
+    "price": 78.92,
+    "ticker": "ORCL",
+    "weburl": "https://www.oracle.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb201"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Apparel",
+    "ipo": "1980-12-02",
+    "logo": "https://logo.clearbit.com/nike.com",
+    "name": "NIKE, Inc.",
+    "price": 115.45,
+    "ticker": "NKE",
+    "weburl": "https://www.nike.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb202"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NASDAQ",
+    "industry": "Semiconductors",
+    "ipo": "1972-05-01",
+    "logo": "https://logo.clearbit.com/amd.com",
+    "name": "Advanced Micro Devices, Inc.",
+    "price": 85.34,
+    "ticker": "AMD",
+    "weburl": "https://www.amd.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb203"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Conglomerate",
+    "ipo": "1892-05-27",
+    "logo": "https://logo.clearbit.com/ge.com",
+    "name": "General Electric Company",
+    "price": 102.45,
+    "ticker": "GE",
+    "weburl": "https://www.ge.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb204"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Aerospace",
+    "ipo": "1934-09-26",
+    "logo": "https://logo.clearbit.com/boeing.com",
+    "name": "The Boeing Company",
+    "price": 220.67,
+    "ticker": "BA",
+    "weburl": "https://www.boeing.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb205"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Machinery",
+    "ipo": "1925-12-02",
+    "logo": "https://logo.clearbit.com/caterpillar.com",
+    "name": "Caterpillar Inc.",
+    "price": 206.88,
+    "ticker": "CAT",
+    "weburl": "https://www.caterpillar.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb206"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Industrial Conglomerates",
+    "ipo": "1946-05-07",
+    "logo": "https://logo.clearbit.com/3m.com",
+    "name": "3M Company",
+    "price": 175.34,
+    "ticker": "MMM",
+    "weburl": "https://www.3m.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb207"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Logistics",
+    "ipo": "1999-11-10",
+    "logo": "https://logo.clearbit.com/ups.com",
+    "name": "United Parcel Service, Inc.",
+    "price": 188.54,
+    "ticker": "UPS",
+    "weburl": "https://www.ups.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb208"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Logistics",
+    "ipo": "1978-12-28",
+    "logo": "https://logo.clearbit.com/fedex.com",
+    "name": "FedEx Corporation",
+    "price": 239.11,
+    "ticker": "FDX",
+    "weburl": "https://www.fedex.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1e2"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NASDAQ",
+    "industry": "Technology",
+    "ipo": "1986-03-13",
+    "logo": "https://logo.clearbit.com/microsoft.com",
+    "name": "Microsoft Corporation",
+    "price": 305.22,
+    "ticker": "MSFT",
+    "weburl": "https://www.microsoft.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1e4"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NASDAQ",
+    "industry": "Consumer Services",
+    "ipo": "1997-05-15",
+    "logo": "https://logo.clearbit.com/amazon.com",
+    "name": "Amazon.com, Inc.",
+    "price": 3470.79,
+    "ticker": "AMZN",
+    "weburl": "https://www.amazon.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1e5"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NASDAQ",
+    "industry": "Technology",
+    "ipo": "2012-05-18",
+    "logo": "https://logo.clearbit.com/meta.com",
+    "name": "Meta Platforms, Inc.",
+    "price": 336.43,
+    "ticker": "META",
+    "weburl": "https://www.meta.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1e6"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NASDAQ",
+    "industry": "Automotive",
+    "ipo": "2010-06-29",
+    "logo": "https://logo.clearbit.com/tesla.com",
+    "name": "Tesla, Inc.",
+    "price": 699.6,
+    "ticker": "TSLA",
+    "weburl": "https://www.tesla.com"
+  },
+  {
+    "_id": {
+      "$oid": "6712f7956064a147f5dcb1e7"
+    },
+    "country": "United States",
+    "currency": "USD",
+    "exchange": "NYSE",
+    "industry": "Financials",
+    "ipo": "1996-05-09",
+    "logo": "https://logo.clearbit.com/berkshirehathaway.com",
+    "name": "Berkshire Hathaway Inc.",
+    "price": 420,
+    "ticker": "BRK.B",
+    "weburl": "https://www.berkshirehathaway.com"
+  }
+]
