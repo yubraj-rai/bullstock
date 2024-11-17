@@ -4,7 +4,6 @@ import { GraphQLError } from 'graphql';
 import bcrypt from 'bcryptjs';
 import { validateLoginInput, validateRegisterInput } from '../../utils/AuthValidator';
 import {verifyGoogleToken} from '../../utils/googleAuth' ;
-
 const generateToken = (user) => {
     return jwt.sign(
         {
@@ -20,10 +19,7 @@ export const UserResolver = {
     Mutation: {
         registerUser: async (_, { username, password, confirmPassword }) => {
             const { valid, errors } = validateRegisterInput(username, password, confirmPassword);
-      
-            console.log(username) ;
-            console.log(password) ;
-            console.log(confirmPassword) ;
+     
             if (!valid) {
               throw new GraphQLError(errors, {
                 extensions: {
