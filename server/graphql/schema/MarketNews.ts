@@ -9,6 +9,6 @@ export const MarketNewsTypeDef = `#graphql
     }
 
     extend type Query {
-        getMarketNews: [MarketNews!]!
+        getMarketNews(limit: Int, offset: Int): [MarketNews]
     }
 `;

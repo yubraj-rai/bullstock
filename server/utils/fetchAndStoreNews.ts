@@ -3,7 +3,7 @@ import { MarketNews } from '../models/MarketNews';
 
 const NEWS_EXPIRY_MINUTES = 10; // Set to 10 minutes to match the API call delay
 
-export async function fetchAndStoreNews() {
+export async function fetchAndStoreNews(limit, offset) {
     try {
         // Check if recent news is already in the database and still valid
         const recentNews = await MarketNews.findOne().sort({ publishedAt: -1 });
@@ -13,7 +13,7 @@ export async function fetchAndStoreNews() {
             const timeDiff = (now.getTime() - recentNews.createdAt.getTime()) / (1000 * 60); // minutes
             if (timeDiff < NEWS_EXPIRY_MINUTES) {
                 console.log('Returning existing news from the database.');
-                return await MarketNews.find().sort({ publishedAt: -1 });
+                return await MarketNews.find().sort({ publishedAt: -1 }).limit(limit).skip(offset);
             }
         }
 
