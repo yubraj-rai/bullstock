@@ -10,6 +10,7 @@ import Modal from 'react-modal';
 import axios from 'axios';
 
 import { useNavigate } from 'react-router-dom';
+import jsPDF from 'jspdf';
 
 
 
@@ -213,6 +214,111 @@ const AccountPage = () => {
       }
     };
       
+    const generatePDF = () => {
+        const doc = new jsPDF();
+        let y = 10;
+    
+        // Header Section
+        doc.setFontSize(22);
+        doc.setTextColor(40);
+        doc.text('Transaction Details', doc.internal.pageSize.width / 2, y, { align: 'center' });
+        doc.setFontSize(12);
+        doc.setTextColor(100);
+        doc.text('Account Summary', doc.internal.pageSize.width / 2, y + 10, { align: 'center' });
+        
+        // Add a line separator below the title
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.5);
+        doc.line(10, y + 15, doc.internal.pageSize.width - 10, y + 15);
+    
+        // User Information Section
+        y += 25;
+        doc.setFontSize(14);
+        doc.setTextColor(40);
+        // doc.text(`User Email: ${auth?.user?.username}`, 10, y);
+        // y += 8;
+        doc.text(`Current Balance: ${auth?.user?.balance.toFixed(2)}`, 10, y);
+        y += 5;
+        doc.line(10, y, doc.internal.pageSize.width - 10, y);
+        
+        // Table Title Section
+        y += 10;
+        doc.setFontSize(16);
+        doc.setTextColor(40);
+        
+        // Custom Table Data
+        const tableColumn = ['Type', 'Ticker', 'Shares', 'Amount', 'Date'];
+        const tableRows : any = [];
+    
+        transactions.forEach((item) => {
+            const itemData = [
+                item.type,
+                item.ticker,
+                item.shares.toString(),
+                new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                    maximumFractionDigits: 2,
+                }).format(item.totalAmount),
+                `${new Date(item.date).toDateString()} - ${new Date(item.date).toLocaleTimeString()}`,
+            ];
+            tableRows.push(itemData);
+        });
+    
+        // Add Table with autoTable Plugin
+        (doc as any).autoTable({
+            head: [tableColumn],
+            body: tableRows,
+            startY: y + 10,
+            theme: 'striped',
+            headStyles: {
+                fillColor: [41, 128, 185],
+                textColor: [255, 255, 255],
+                fontStyle: 'bold',
+            },
+            bodyStyles: {
+                halign: 'center',
+                fontSize: 10,
+                textColor: [80, 80, 80],
+            },
+            alternateRowStyles: {
+                fillColor: [245, 245, 245],
+            },
+            styles: {
+                fontSize: 10,
+                cellPadding: 6,
+                halign: 'center',
+                valign: 'middle',
+                lineColor: [44, 62, 80],
+                lineWidth: 0.25,
+            },
+            columnStyles: {
+                0: { cellWidth: 'auto' },
+                1: { cellWidth: 'auto' },
+                2: { cellWidth: 'auto' },
+                3: { cellWidth: 'auto' },
+                4: { cellWidth: 'auto' },
+            },
+        });
+    
+        // Add Footer with Page Numbering
+        const pageCount = (doc as any).internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(10);
+            doc.setTextColor(150);
+            doc.text(
+                `Page ${i} of ${pageCount}`,
+                doc.internal.pageSize.width / 2,
+                doc.internal.pageSize.height - 10,
+                { align: 'center' }
+            );
+        }
+    
+        // Save the PDF
+        doc.save('transaction_report.pdf');
+    };
+
     return (
       <>
           {auth && (
@@ -379,9 +485,18 @@ const AccountPage = () => {
                                   <div className='flex h-full min-w-panel'>
                                       <div className='text-xs overflow-auto h-panel w-full'>
                                           {/* Header */}
-                                          <h2 className='text-left text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-[#219cd7] to-[#6dbfdd] mb-4 px-4 py-2'>
+                                          {/* <h2 className='text-left text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-[#219cd7] to-[#6dbfdd] mb-4 px-4 py-2'>
                                               Transactions - {transactions && transactions.length} Latest Records
-                                          </h2>
+                                          </h2> */}
+
+                                          <h2 className='text-left text-lg font-semibold text-gray-700 capitalize dark:text-gray-200 mb-2 px-3 pt-2 flex justify-between items-center'>
+                                                <span>Transactions - {transactions && transactions.length} latest records</span>
+                                                <button 
+                                                    className="w-10 transition-all h-10 display: inline-block sm:w-auto sm:h-10 text-sm sm:px-4 sm:py-2 sm:justify-center rounded-full outline-none border-none flex justify-center items-center px-3 py-1 font-medium hover:bg-opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-white bg-[#6dbfdd] focus-visible:ring-opacity-75 shadow-md" 
+                                                    onClick={generatePDF}>
+                                                    Download PDF
+                                                </button>
+                                            </h2>
 
                                           {/* Table Wrapper */}
                                           <div className='shadow-lg rounded-lg overflow-hidden'>

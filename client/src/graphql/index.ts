@@ -249,21 +249,9 @@ export const GET_STOCK = gql(`
 `);
 
 
-export const GET_MARKET_NEWS = gql`
-    query {
-        getMarketNews {
-            title
-            description
-            url
-            imageUrl
-            publishedAt
-        }
-    }
-`;
-
 // export const GET_MARKET_NEWS = gql`
-//     query GetMarketNews($limit: Int!, $offset: Int!) {
-//         getMarketNews(limit: $limit, offset: $offset) {
+//     query {
+//         getMarketNews {
 //             title
 //             description
 //             url
@@ -272,3 +260,15 @@ export const GET_MARKET_NEWS = gql`
 //         }
 //     }
 // `;
+
+export const GET_MARKET_NEWS = gql`
+    query GetMarketNews($limit: Int!, $offset: Int!) {
+        getMarketNews(limit: $limit, offset: $offset) {
+            title
+            description
+            url
+            imageUrl
+            publishedAt
+        }
+    }
+`;
