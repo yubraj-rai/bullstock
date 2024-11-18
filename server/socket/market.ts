@@ -52,7 +52,7 @@ export const updateStockPrices = async (interval = DEFAULT_INTERVAL, io?: Server
                     if (apiCallCount >= MAX_API_CALLS_PER_MINUTE) {
                         const timeSinceLastCall = Date.now() - lastApiCallTime;
                         const waitTime = 60000 - timeSinceLastCall; // Time to wait in milliseconds
-                        console.log(`API rate limit reached. Waiting for ${waitTime / 1000} seconds.`);
+                        //console.log(`API rate limit reached. Waiting for ${waitTime / 1000} seconds.`);
                         await new Promise(resolve => setTimeout(resolve, waitTime));
                         apiCallCount = 0; // Reset the API call count
                     }
@@ -65,7 +65,7 @@ export const updateStockPrices = async (interval = DEFAULT_INTERVAL, io?: Server
                             if (now - lastUpdateTime >= MIN_UPDATE_INTERVAL) {
                                 finnhubClient.quote(ticker, async (error, data) => {
                                     if (error) {
-                                        console.error(`Error fetching price for ${ticker}:`, error);
+                                        //console.error(`Error fetching price for ${ticker}:`, error);
                                         return reject(error);
                                     }
 
@@ -78,7 +78,7 @@ export const updateStockPrices = async (interval = DEFAULT_INTERVAL, io?: Server
                                                 { ticker },
                                                 { price }
                                             );
-                                            console.log(`Database updated for ${ticker} with price: ${price}`);
+                                            //console.log(`Database updated for ${ticker} with price: ${price}`);
                                             updatedStocks.push({ ticker, price });
 
                                             // Emit to Socket.io with a slight delay
@@ -88,12 +88,12 @@ export const updateStockPrices = async (interval = DEFAULT_INTERVAL, io?: Server
                                             // Update the last update time for the ticker
                                             lastUpdateTimes[ticker] = now;
                                         } catch (dbError) {
-                                            console.error(`Error updating database for ${ticker}:`, dbError);
+                                            //console.error(`Error updating database for ${ticker}:`, dbError);
                                         }
 
                                         resolve();
                                     } else {
-                                        console.warn(`No data received for ${ticker}`);
+                                        //console.warn(`No data received for ${ticker}`);
                                         resolve();
                                     }
                                 });
@@ -111,11 +111,11 @@ export const updateStockPrices = async (interval = DEFAULT_INTERVAL, io?: Server
                     await new Promise(resolve => setTimeout(resolve, 1000));
                 }
 
-                console.log(`Finished updating ${updatedStocks.length} stocks.`);
+                //console.log(`Finished updating ${updatedStocks.length} stocks.`);
 
                 // Check if all tickers have been updated
                 if (Object.keys(lastUpdateTimes).length === stockTickers.length) {
-                    console.log(`All tickers updated. Waiting for ${COOLDOWN_PERIOD / 1000} seconds before next update.`);
+                    //console.log(`All tickers updated. Waiting for ${COOLDOWN_PERIOD / 1000} seconds before next update.`);
                     await new Promise(resolve => setTimeout(resolve, COOLDOWN_PERIOD));
                     // Reset the last update times
                     Object.keys(lastUpdateTimes).forEach(ticker => {
@@ -123,7 +123,7 @@ export const updateStockPrices = async (interval = DEFAULT_INTERVAL, io?: Server
                     });
                 }
             } catch (error) {
-                console.error("Error processing stock data:", error);
+                //console.error("Error processing stock data:", error);
             }
         }, interval);
     }
