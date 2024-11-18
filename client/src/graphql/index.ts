@@ -1,17 +1,24 @@
 import { gql } from '@apollo/client';
 
-export const LOGIN_USER = gql(`
-    mutation LoginUser($username: String!, $password: String!) {
-        loginUser(username: $username, password: $password) {
-            user {
-                _id
-                balance
-                username
-            }
-            token
-        }
+export const LOGIN_USER = gql`
+  mutation LoginUser($username: String!, $password: String!) {
+    loginUser(username: $username, password: $password) {
+      user {
+        _id
+        username
+        createdAt
+        updatedAt
+        balance
+        stripeAccountId
+        googleId
+        otp
+        otpExpiry
+      }
+      token
     }
-`);
+  }
+`;
+
 export const GET_TRANSACTIONS = gql(`
   query GetTransactions {
       transactions {
@@ -25,20 +32,68 @@ export const GET_TRANSACTIONS = gql(`
       }
   }
 `);
-export const DEPOSIT = gql(`
+
+// Updated GraphQL Mutations
+export const CREATE_STRIPE_SESSION = gql`
+  mutation CreateStripeSession($amount: Float!) {
+    createStripeSession(amount: $amount) {
+      sessionId
+      url
+    }
+  }
+`;
+
+export const DEPOSIT = gql`
   mutation Deposit($amount: Float!) {
-      deposit(amount: $amount) {
-          newBalance
-      }
+    deposit(amount: $amount) {
+      success
+      message
+      newBalance
+    }
   }
-`);
-export const WITHDRAW = gql(`
+`;
+
+export const WITHDRAW = gql`
   mutation Withdraw($amount: Float!) {
-      withdraw(amount: $amount) {
-          newBalance
-      }
+    withdraw(amount: $amount) {
+      success
+      message
+      newBalance
+    }
   }
-`);
+`;
+
+export const CREATE_STRIPE_ACCOUNT_LINK = gql`
+  mutation CreateStripeAccountLink($userId: String!) {
+    createStripeAccountLink(userId: $userId) {
+      success
+      url
+      stripeAccountId
+    }
+  }
+`;
+
+
+export const CHECK_STRIPE_ACCOUNT_REQUIREMENTS = gql`
+  query CheckStripeAccountRequirements($stripeAccountId: String!) {
+    checkStripeAccountRequirements(stripeAccountId: $stripeAccountId) {
+      success
+      requirements
+    }
+  }
+`;
+
+export const VERIFY_PAYMENT = gql`
+  mutation VerifyPayment($userId: String!, $sessionId: String!) {
+    verifyPayment(userId: $userId, sessionId: $sessionId) {
+      success
+      message
+      amount
+      newBalance
+    }
+  }
+`;
+
 
 export const REGISTER_USER = gql(`
     mutation RegisterUser($username: String!, $password: String!, $confirmPassword: String!) {

@@ -39,6 +39,34 @@ const TransactionSchema = new Schema({
     },
 });
 
+const BankingTransactionSchema = new Schema({
+  userId: {
+    type: String,
+    required: true,
+  },
+  type: {
+    type: String,
+    required: true,
+  },
+  totalAmount: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
+  paymentMethod: {
+    type: String,
+    required: true,
+  },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
+  status: {
+    type: String,
+    enum: ['Pending', 'Completed', 'Failed'],
+    default: 'Pending',
+  },
+});
 
-// Export the Mongoose model for the Transaction schema
 export const Transaction = mongoose.model('Transaction', TransactionSchema);
+export const BankingTransaction = mongoose.model('BankingTransaction', BankingTransactionSchema );

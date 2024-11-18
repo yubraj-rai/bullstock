@@ -16,7 +16,14 @@ interface Stock {
 interface User {
   _id: string;
   username: string;
+  password: string;
+  createdAt: Date;
+  updatedAt: Date;
   balance: number;
+  googleId?: string; // Optional because it allows `null` values
+  otp?: string; // Optional because it's not always required
+  otpExpiry?: Date; // Optional because it's not always required
+  stripeAccountId: string;
 }
 
 interface StockUpdate {

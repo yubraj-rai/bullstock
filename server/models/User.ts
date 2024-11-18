@@ -34,6 +34,10 @@ const UserSchema = new Schema({
     otpExpiry: { 
         type: Date, 
         required: false 
+    },
+    stripeAccountId: {
+        type: String,
+        required: true,
     }
 });
 
