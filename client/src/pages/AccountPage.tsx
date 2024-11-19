@@ -11,7 +11,7 @@ import axios from 'axios';
 
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
-
+import 'jspdf-autotable';
 
 
 Modal.setAppElement('#root'); // Set the app element for react-modal here

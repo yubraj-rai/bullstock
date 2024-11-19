@@ -22,12 +22,18 @@ export const TransactionResolver = {
 
       // Retrieve all transactions (banking and stock-related) for the user
       const stockTransactions = await Transaction.find({ userId: result.userId }).sort({ date: -1 });
-      const bankingTransactions = await BankingTransaction.find({ userId: result.userId }).sort({ date: -1 });
-
-      return {
-        stockTransactions,
-        bankingTransactions,
-      };
+      // if (stockTransactions.length > 50) {
+      //   await Transaction.findOneAndDelete({ userId: result.userId }, { sort: { ['date']: 1 } });
+      // }
+      // console.log("stockTransactions :::::",stockTransactions);
+      
+      // const bankingTransactions = await BankingTransaction.find({ userId: result.userId }).sort({ date: -1 });
+      // console.log("bankingTransactions :::::",bankingTransactions);
+      return stockTransactions;
+      // return {
+      //   stockTransactions,
+      //   bankingTransactions,
+      // };
     },
     checkStripeAccountRequirements: async (_, { stripeAccountId }) => {
         try {
@@ -347,46 +353,46 @@ export const TransactionResolver = {
         }
       },      
       
-    sellStock: async (_, { ticker, shares, stockPrice }, context) => {
-      const { token } = context;
+    // sellStock: async (_, { ticker, shares, stockPrice }, context) => {
+    //   const { token } = context;
 
-      const result = await verifyToken(token);
+    //   const result = await verifyToken(token);
 
-      if (result.error) {
-        throw new GraphQLError(result.error, {
-          extensions: {
-            code: 'UNAUTHORIZED',
-          },
-        });
-      }
+    //   if (result.error) {
+    //     throw new GraphQLError(result.error, {
+    //       extensions: {
+    //         code: 'UNAUTHORIZED',
+    //       },
+    //     });
+    //   }
 
-      const user = await User.findById(result.userId);
-      const totalAmount = shares * stockPrice;
+    //   const user = await User.findById(result.userId);
+    //   const totalAmount = shares * stockPrice;
 
-      if (!user) {
-        throw new GraphQLError('User not found', {
-          extensions: { code: 'USER_NOT_FOUND' },
-        });
-      }
+    //   if (!user) {
+    //     throw new GraphQLError('User not found', {
+    //       extensions: { code: 'USER_NOT_FOUND' },
+    //     });
+    //   }
 
-      const transaction = new Transaction({
-        userId: user.id,
-        type: 'Sell',
-        ticker,
-        shares,
-        totalAmount,
-        stockPrice,
-      });
+    //   const transaction = new Transaction({
+    //     userId: user.id,
+    //     type: 'Sell',
+    //     ticker,
+    //     shares,
+    //     totalAmount,
+    //     stockPrice,
+    //   });
 
-      user.balance += totalAmount;
+    //   user.balance += totalAmount;
 
-      await Promise.all([transaction.save(), user.save()]);
+    //   await Promise.all([transaction.save(), user.save()]);
 
-      return {
-        success: true,
-        message: 'Stock sold successfully',
-        newBalance: user.balance,
-      };
-    },
+    //   return {
+    //     success: true,
+    //     message: 'Stock sold successfully',
+    //     newBalance: user.balance,
+    //   };
+    // },
   },
 };
