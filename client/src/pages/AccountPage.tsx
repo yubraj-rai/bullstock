@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { AuthState } from '../types';
-import { GET_TRANSACTIONS, DEPOSIT, WITHDRAW, CREATE_STRIPE_SESSION, CREATE_STRIPE_ACCOUNT_LINK, CHECK_STRIPE_ACCOUNT_REQUIREMENTS, VERIFY_PAYMENT } from '../graphql';
+import { GET_TRANSACTIONS, DEPOSIT, WITHDRAW, CREATE_STRIPE_SESSION, CREATE_STRIPE_ACCOUNT_LINK, VERIFY_PAYMENT } from '../graphql';
 import { UPDATE_BALANCE } from '../redux/actions';
 import { Tab } from '@headlessui/react';
-import { useQuery, useLazyQuery, useMutation } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
 import { Transaction } from '../__generated__/graphql';
 import Modal from 'react-modal';
-import axios from 'axios';
 
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
@@ -22,7 +21,7 @@ function classNames(...classes: any) {
 
 const transferOptions = [500, 1000, 10000];
 
-const AccountPage = () => {
+const AccountPage = ({ refetchUser }: { refetchUser: () => Promise<any> }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -101,6 +100,8 @@ const AccountPage = () => {
   }
       
     const handleDeposit = async () => {
+
+        debugger ;
         if (transferAmount <= 0) {
           setErrors('Amount must be greater than 0');
           return;
@@ -141,78 +142,95 @@ const AccountPage = () => {
       
 
     const handleWithdraw = async () => {
-      if (transferAmount <= 0) {
-        console.error('Error: Transfer amount must be greater than 0');
-        setErrors('Amount must be greater than 0');
-        return;
-      }
-    
-      if (transferAmount > auth?.user?.balance) {
-        console.error('Error: Insufficient balance for withdrawal');
-        setErrors('Insufficient balance');
-        return;
-      }
-    
-      setErrors(null);
-      setIsLoadingWithdraw(true);
-    
-      console.log('Initiating withdrawal process...',auth);
-      console.log('Current User Balance:', auth?.user?.balance);
-      console.log('Requested Transfer Amount:', transferAmount);
-      console.log('Stripe Account ID:', auth?.user?.stripeAccountId);
-      debugger ;
-    
-
-      try {
-        // Check if the user has a linked Stripe account
-        if (!auth?.user?.stripeAccountId) {
-          console.log('User does not have a linked Stripe account. Initiating account creation...');
-          
-          const { data } = await createStripeAccountLink({
-            variables: { userId: auth?.user?._id },
-          });
-    
-          if (data?.createStripeAccountLink?.success) {
-            console.log('Stripe account successfully created and Redirecting to Stripe onboarding:', data.createStripeAccountLink.stripeAccountId);
-            auth.user.stripeAccountId = data.createStripeAccountLink.stripeAccountId;
-            window.location.href = data.createStripeAccountLink.url;
-          } else {
-            console.error('Error: Failed to create Stripe account link');
-            throw new Error(data?.createStripeAccountLink?.message || 'Failed to create Stripe account link');
-          }
-        }  
-    
-        // Proceed with withdrawal
-        console.log('Executing withdrawal mutation...');
-        const { data: withdrawData } = await withdrawMutation({
-          variables: { amount: transferAmount },
-        });
-    
-        if (withdrawData?.withdraw?.success) {
-          console.log('Withdrawal successful. New balance:', withdrawData.withdraw.newBalance);
-          dispatch({
-            type: UPDATE_BALANCE,
-            payload: { newBalance: withdrawData.withdraw.newBalance },
-          });
-          setErrors('Withdrawal successful!');
-          setTransferAmount(0);
-        } else {
-          console.error('Error: Withdrawal failed');
-          throw new Error(withdrawData?.withdraw?.message || 'Withdrawal failed');
+        debugger ;
+        if (transferAmount <= 0) {
+            console.error('Error: Transfer amount must be greater than 0');
+            setErrors('Amount must be greater than 0');
+            return;
         }
-      } catch (err) {
-        if (err instanceof Error) {
-          console.error('Error processing withdrawal:', err.message);
-          setErrors(err.message || 'Failed to process withdrawal');
-        } else {
-          console.error('Unexpected error processing withdrawal:', err);
-          setErrors('Failed to process withdrawal');
+    
+        if (transferAmount > auth?.user?.balance) {
+            console.error('Error: Insufficient balance for withdrawal');
+            setErrors('Insufficient balance');
+            return;
         }
-      } finally {
-        console.log('Withdrawal process completed.');
-        setIsLoadingWithdraw(false);
-      }
+    
+        setErrors(null);
+        setIsLoadingWithdraw(true);
+    
+        console.log('Initiating withdrawal process...', auth);
+        console.log('Current User Balance:', auth?.user?.balance);
+        console.log('Requested Transfer Amount:', transferAmount);
+        console.log('Stripe Account ID:', auth?.user?.stripeAccountId);
+    
+        try {
+            // Refetch user data to get the latest Stripe account ID and balance
+            const { data: refetchedData } = await refetchUser();
+            if (!refetchedData?.getUser) {
+                throw new Error('Failed to refetch user data');
+            }
+    
+            // Update the Redux store with the refetched user data
+            dispatch({ type: UPDATE_BALANCE, payload: { newBalance: refetchedData.getUser.balance } });
+    
+            // Debug logs
+            console.log('Refetched User Data:', refetchedData?.getUser);
+            console.log('Updated Stripe Account ID:', refetchedData?.getUser?.user?.stripeAccountId);
+    
+            // Check if the user has a linked Stripe account
+            if (!refetchedData?.getUser?.user?.stripeAccountId) {
+                console.log('User does not have a linked Stripe account. Initiating account creation...');
+    
+                const { data } = await createStripeAccountLink({
+                    variables: { userId: auth?.user?._id },
+                });
+    
+                if (data?.createStripeAccountLink?.success) {
+                    console.log(
+                        'Stripe account successfully created and redirecting to Stripe onboarding:',
+                        data.createStripeAccountLink.stripeAccountId
+                    );
+                    auth.user.stripeAccountId = data.createStripeAccountLink.stripeAccountId; // Update local auth
+                    window.location.href = data.createStripeAccountLink.url; // Redirect to Stripe onboarding
+                    return; // Exit withdrawal process until onboarding is complete
+                } else {
+                    console.error('Error: Failed to create Stripe account link');
+                    throw new Error(data?.createStripeAccountLink?.message || 'Failed to create Stripe account link');
+                }
+            }
+    
+            // Proceed with withdrawal
+            console.log('Executing withdrawal mutation...');
+            const { data: withdrawData } = await withdrawMutation({
+                variables: { amount: transferAmount },
+            });
+    
+            if (withdrawData?.withdraw?.success) {
+                console.log('Withdrawal successful. New balance:', withdrawData.withdraw.newBalance);
+                dispatch({
+                    type: UPDATE_BALANCE,
+                    payload: { newBalance: withdrawData.withdraw.newBalance },
+                });
+                setErrors('Withdrawal successful!');
+                setTransferAmount(0); // Reset transfer amount after successful withdrawal
+            } else {
+                console.error('Error: Withdrawal failed');
+                throw new Error(withdrawData?.withdraw?.message || 'Withdrawal failed');
+            }
+        } catch (err) {
+            if (err instanceof Error) {
+                console.error('Error processing withdrawal:', err.message);
+                setErrors(err.message || 'Failed to process withdrawal');
+            } else {
+                console.error('Unexpected error processing withdrawal:', err);
+                setErrors('Failed to process withdrawal');
+            }
+        } finally {
+            console.log('Withdrawal process completed.');
+            setIsLoadingWithdraw(false);
+        }
     };
+    
       
     const generatePDF = () => {
         const doc = new jsPDF();
@@ -254,7 +272,7 @@ const AccountPage = () => {
             const itemData = [
                 item.type,
                 item.ticker,
-                item.shares.toString(),
+                item.shares?.toString() || '0',
                 new Intl.NumberFormat('en-US', {
                     style: 'currency',
                     currency: 'USD',

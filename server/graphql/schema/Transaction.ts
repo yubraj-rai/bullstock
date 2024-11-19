@@ -29,12 +29,6 @@ export const TransactionTypeDef = `#graphql
     stripeAccountId: String
   }
 
-  type StripeRequirementsResponse {
-    success: Boolean!
-    requirements: [String!]!
-  }
-
-
   type PaymentVerificationResponse {
     success: Boolean!
     message: String!
@@ -42,11 +36,8 @@ export const TransactionTypeDef = `#graphql
     newBalance: Float!
   }
 
-
-
   extend type Query {
     transactions: [Transaction!]!
-    checkStripeAccountRequirements(stripeAccountId: String!): StripeRequirementsResponse!
   }
 
   extend type Mutation {

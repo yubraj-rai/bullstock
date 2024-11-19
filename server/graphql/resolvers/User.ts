@@ -4,6 +4,7 @@ import { GraphQLError } from 'graphql';
 import bcrypt from 'bcryptjs';
 import { validateLoginInput, validateRegisterInput } from '../../utils/AuthValidator';
 import {verifyGoogleToken} from '../../utils/googleAuth' ;
+import { verifyToken } from '../../middleware/auth';
 
 const generateToken = (user) => {
     return jwt.sign(
@@ -54,7 +55,7 @@ export const UserResolver = {
       
             return { user: result, token };
           },
-          loginUser: async (_, { username, password }) => {
+        loginUser: async (_, { username, password }) => {
             const { valid, errors } = validateLoginInput(username, password);
         
             if (!valid) {
@@ -97,7 +98,7 @@ export const UserResolver = {
             const completeUser = await User.findById(user._id); // Re-fetch full user details
         
             return { user: completeUser, token };
-        },
+         },
         
         googleLogin: async (_, { googleToken }) => {
             try {
@@ -141,17 +142,41 @@ export const UserResolver = {
                 });
             }
         },
-        
-        changeUsername: async (_, { newUsername, confirmPassword }, context) => {
-            // Placeholder resolver for changing username
-            return null; // Returning null as a placeholder
-        },
     },
 
     Query: {
         getUser: async (_, args, context) => {
-            // Placeholder resolver for fetching a user
-            return null; // Returning null as a placeholder
+            const { token } = context;
+        
+            // Verify the token to authenticate the user
+            const result = await verifyToken(token);
+            if (result.error) {
+                throw new GraphQLError(result.error, {
+                    extensions: {
+                        code: 'UNAUTHORIZED',
+                    },
+                });
+            }
+        
+            // Fetch the user from the database
+            const user = await User.findById(result.userId);
+            if (!user) {
+                throw new GraphQLError('User not found', {
+                    extensions: { code: 'USER_NOT_FOUND' },
+                });
+            }
+        
+            // Return the user along with a token
+            return {
+                user: {
+                    _id: user._id,
+                    username: user.username,
+                    balance: user.balance,
+                    stripeAccountId: user.stripeAccountId,
+                },
+                token: token, // Return the same token
+            };
         },
+        
     },
 };

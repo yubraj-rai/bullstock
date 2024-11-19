@@ -35,22 +35,6 @@ export const TransactionResolver = {
       //   bankingTransactions,
       // };
     },
-    checkStripeAccountRequirements: async (_, { stripeAccountId }) => {
-        try {
-          const account = await stripe.accounts.retrieve(stripeAccountId);
-          console.log('checkStripeAccountRequirements:', account);
-          console.log('account.requirements.currently_due:', account.requirements.currently_due);
-          return {
-            success: true,
-            requirements: account.requirements.currently_due || [],
-          };
-        } catch (err) {
-          console.error('Error retrieving Stripe account requirements:', err.message);
-          throw new GraphQLError('Failed to retrieve account requirements', {
-            extensions: { code: 'REQUIREMENTS_CHECK_ERROR', details: err.message },
-          });
-        }
-      },
   },
 
   Mutation: {
@@ -93,9 +77,7 @@ export const TransactionResolver = {
     },
 
     verifyPayment: async (_, { userId, sessionId }) => {
-      try {
-        console.log("===================Verification started for userId:", userId, "sessionId:", sessionId);
-    
+      try {    
         const transaction = await BankingTransaction.findOne({
           userId,
           stripeSessionId: sessionId,
@@ -177,9 +159,7 @@ export const TransactionResolver = {
 
     withdraw: async (_, { amount }, context) => {
         const { token } = context;
-      
-        console.log("===========withdraw================");
-      
+
         // Authenticate the user using the provided token
         const result = await verifyToken(token);
         if (result.error) {
@@ -190,8 +170,6 @@ export const TransactionResolver = {
           });
         }
       
-        console.log("===========withdraw===============2=", result.userId);
-      
         // Retrieve the user from the database
         const user = await User.findById(result.userId);
         if (!user) {
@@ -199,40 +177,29 @@ export const TransactionResolver = {
             extensions: { code: 'USER_NOT_FOUND' },
           });
         }
-            
-        console.log('User Stripe Account ID:', user.stripeAccountId);
-      
+                  
         // Validate the withdrawal amount
         if (amount <= 0) {
           throw new GraphQLError('Invalid withdrawal amount. Must be greater than 0.', {
             extensions: { code: 'INVALID_AMOUNT' },
           });
         }
-      
-        console.log("===========withdraw==============5==");
-      
+            
         // Check if the user has sufficient funds
         if (user.balance < amount) {
           throw new GraphQLError('Insufficient funds', {
             extensions: { code: 'INSUFFICIENT_FUNDS' },
           });
         }
-
-        const account = await stripe.accounts.retrieve('acct_1QLf6TQ0oB5ILoAp');
-        console.log('Connected Account Capabilities:', account.capabilities);
-        console.log('Unmet Requirements:', account.requirements.currently_due);
             
         try {
           // Create a Stripe transfer to the user's connected account   
-          console.log("===========withdraw ammount: ", Math.round(amount * 100));       
           const transfer = await stripe.transfers.create({
             amount: Math.round(amount * 100), // Convert amount to cents
             currency: 'cad',
             destination: user.stripeAccountId, // Linked Stripe account ID
           });
       
-          console.log("===========withdraw successfull==============7==", transfer.id);
-
           const payout = await stripe.payouts.create(
             {
               amount: Math.round(amount * 100), // Amount in cents (e.g., $50.00)
@@ -242,17 +209,11 @@ export const TransactionResolver = {
               stripeAccount: user.stripeAccountId, // Connected account ID
             }
           );
-          console.log('Payout :', payout);
-          console.log('Payout initiated:', payout.id);
 
           const payoutDetails = await stripe.payouts.retrieve(payout.id, {
             stripeAccount: user.stripeAccountId, // Connected account ID
           });
-          
-          console.log('Payout details:', payoutDetails);
-          
-          
-      
+                          
           // Deduct balance and create a transaction record
           const transaction = new BankingTransaction({
             userId: user.id,
@@ -280,9 +241,9 @@ export const TransactionResolver = {
           });
         }
     },
+
     createStripeAccountLink: async (_, { userId }, context) => {
-        console.log("Mutation Hit: createStripeAccountLink");
-        console.log("User ID:", userId);
+        console.log("started creating stripe account link for user: ", userId);
       
         try {
           // Fetch the user from the database
@@ -292,40 +253,29 @@ export const TransactionResolver = {
               extensions: { code: 'USER_NOT_FOUND' },
             });
           }
-      
-          // console.log("======stripe.accounts.create===========", user.username);
-          // const account = await stripe.accounts.create({
-          //   type: 'custom',
-          //   email: user.username, // Use user's email from the database
-          //   business_type: 'individual', // Individual account
-          // });
+    
           
           const account = await stripe.accounts.create({
-            type: 'custom', // Custom account type
-            email: user.username, // Use user's email from the database
-            country: 'CA', // Set the country to Canada (CA) or adjust as needed
-            business_type: 'individual', // Individual account type
+            type: 'custom', 
+            email: user.username, 
+            country: 'CA', 
+            business_type: 'individual', 
             capabilities: {
               card_payments: {
-                requested: true, // Enable card payments capability
+                requested: true,
               },
               transfers: {
-                requested: true, // Enable transfers capability
+                requested: true,
               },
             },
           });
       
-          // Log the created account details
           console.log('Stripe account created:', account.id);  
-          // Verify the account capabilities after creation
           const updatedAccount = await stripe.accounts.retrieve(account.id);
-          console.log('Account capabilities:', updatedAccount.capabilities);
 
-          
           if (updatedAccount.requirements.currently_due.length > 0) {
             console.warn('Unmet requirements for account activation:', updatedAccount.requirements.currently_due);
           }
-
 
           user.stripeAccountId = account.id;
           await user.save();
@@ -333,8 +283,8 @@ export const TransactionResolver = {
           // Create a Stripe account link for onboarding
           const accountLink = await stripe.accountLinks.create({
             account: user.stripeAccountId,
-            refresh_url: `${process.env.CLIENT_URL}/onboard/refresh`,
-            return_url: `${process.env.CLIENT_URL}/onboard/success`,
+            refresh_url: `${process.env.CLIENT_URL}/account`,
+            return_url: `${process.env.CLIENT_URL}/account`,
             type: 'account_onboarding',
           });
 

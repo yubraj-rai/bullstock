@@ -37,7 +37,7 @@ const UserSchema = new Schema({
     },
     stripeAccountId: {
         type: String,
-        required: true,
+        required: false,
     }
 });
 

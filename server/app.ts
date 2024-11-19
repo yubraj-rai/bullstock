@@ -60,12 +60,23 @@ const init = async () => {
   await server.start();
 
   // Set up GraphQL endpoint with Express middleware
+  // app.use(
+  //   "/graphql",
+  //   cors({ origin: true, credentials: true }),
+  //   json(),
+  //   expressMiddleware(server, {
+  //     context: async ({ req }) => ({ token: req.headers.authorization }),
+  //   })
+  // );
+
   app.use(
-    "/graphql",
-    cors({ origin: true, credentials: true }),
-    json(),
+    '/graphql',
     expressMiddleware(server, {
-      context: async ({ req }) => ({ token: req.headers.authorization }),
+      context: async ({ req }) => {
+        const token = req.headers.authorization || '';
+        //console.log('Authorization header from client:', token); // Debug log
+        return { token };
+      },
     })
   );
 
