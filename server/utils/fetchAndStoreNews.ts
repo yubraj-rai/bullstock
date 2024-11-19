@@ -1,16 +1,26 @@
 import fetch from 'node-fetch';
 import { MarketNews } from '../models/MarketNews';
+import Redis from 'ioredis'; // or use 'redis' depending on your preference
 
 const NEWS_EXPIRY_MINUTES = 10; // Set to 10 minutes to match the API call delay
 
+// Set up Redis connection
+const redis = new Redis({
+  host: process.env.REDIS_HOST || 'localhost',
+  port: parseInt(process.env.REDIS_PORT || '6379', 10),
+});
+
 export async function fetchAndStoreNews(limit, offset) {
     try {
-        // Check if recent news is already in the database and still valid
-        const recentNews = await MarketNews.findOne().sort({ publishedAt: -1 });
-
-        if (recentNews) {
+        // Check if recent news is cached in Redis
+        const cachedNews = await redis.get('marketNews');
+        
+        if (cachedNews) {
+            // If cached news exists, parse it and check its expiration time
+            const newsData = JSON.parse(cachedNews);
             const now = new Date();
-            const timeDiff = (now.getTime() - recentNews.createdAt.getTime()) / (1000 * 60); // minutes
+            const timeDiff = (now.getTime() - new Date(newsData[0].createdAt).getTime()) / (1000 * 60); // minutes
+            
             if (timeDiff < NEWS_EXPIRY_MINUTES) {
                 console.log('Returning existing news from the database.');
                 return await MarketNews.find().sort({ publishedAt: -1 }).limit(limit).skip(offset);
@@ -19,7 +29,7 @@ export async function fetchAndStoreNews(limit, offset) {
 
         console.log('Fetching new data from the API.');
 
-        // Fetch new news data if none found or if outdated
+        // Fetch new news data if not found in cache or cache is outdated
         const response = await fetch(
             `https://finnhub.io/api/v1/news?category=general&token=${process.env.FINNHUB_API_KEY}`
         );
@@ -35,7 +45,7 @@ export async function fetchAndStoreNews(limit, offset) {
             return [];
         }
 
-        // Clear old news only if new data is successfully fetched
+        // Clear old news in MongoDB only if new data is successfully fetched
         await MarketNews.deleteMany({});
         const newsDocs = data.map((newsItem: any) => ({
             title: newsItem.headline,
@@ -43,11 +53,15 @@ export async function fetchAndStoreNews(limit, offset) {
             url: newsItem.url,
             imageUrl: newsItem.image,
             publishedAt: new Date(newsItem.datetime * 1000),
+            createdAt: new Date(), // This is the date the document was inserted
         }));
 
-        // Insert new data into the database
+        // Insert new data into MongoDB
         await MarketNews.insertMany(newsDocs);
         console.log('News data successfully updated in MongoDB');
+
+        // Cache the news data in Redis for future requests
+        await redis.set('marketNews', JSON.stringify(newsDocs), 'EX', NEWS_EXPIRY_MINUTES * 60); // Expiry time in seconds
 
         return newsDocs;
     } catch (error) {
