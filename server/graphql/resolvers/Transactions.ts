@@ -158,89 +158,89 @@ export const TransactionResolver = {
     },
 
     withdraw: async (_, { amount }, context) => {
-        const { token } = context;
-
-        // Authenticate the user using the provided token
-        const result = await verifyToken(token);
-        if (result.error) {
+      const { token } = context;
+  
+      // Authenticate the user using the provided token
+      const result = await verifyToken(token);
+      if (result.error) {
           throw new GraphQLError(result.error, {
-            extensions: {
-              code: 'UNAUTHORIZED',
-            },
+              extensions: {
+                  code: 'UNAUTHORIZED',
+              },
           });
-        }
-      
-        // Retrieve the user from the database
-        const user = await User.findById(result.userId);
-        if (!user) {
+      }
+  
+      // Retrieve the user from the database
+      const user = await User.findById(result.userId);
+      if (!user) {
           throw new GraphQLError('User not found', {
-            extensions: { code: 'USER_NOT_FOUND' },
+              extensions: { code: 'USER_NOT_FOUND' },
           });
-        }
-                  
-        // Validate the withdrawal amount
-        if (amount <= 0) {
-          throw new GraphQLError('Invalid withdrawal amount. Must be greater than 0.', {
-            extensions: { code: 'INVALID_AMOUNT' },
-          });
-        }
-            
-        // Check if the user has sufficient funds
-        if (user.balance < amount) {
-          throw new GraphQLError('Insufficient funds', {
-            extensions: { code: 'INSUFFICIENT_FUNDS' },
-          });
-        }
-            
-        try {
-          // Create a Stripe transfer to the user's connected account   
+      }
+  
+      try {
+          // Create a Stripe transfer to the user's connected account
+          console.log(`Initiating transfer of ${amount} CAD to Stripe account: ${user.stripeAccountId}`);
           const transfer = await stripe.transfers.create({
-            amount: Math.round(amount * 100), // Convert amount to cents
-            currency: 'cad',
-            destination: user.stripeAccountId, // Linked Stripe account ID
-          });
-      
-          const payout = await stripe.payouts.create(
-            {
-              amount: Math.round(amount * 100), // Amount in cents (e.g., $50.00)
+              amount: Math.round(amount * 100), 
               currency: 'cad',
-            },
-            {
-              stripeAccount: user.stripeAccountId, // Connected account ID
-            }
-          );
+              destination: user.stripeAccountId,
+          });
 
-          const payoutDetails = await stripe.payouts.retrieve(payout.id, {
-            stripeAccount: user.stripeAccountId, // Connected account ID
-          });
-                          
-          // Deduct balance and create a transaction record
+          console.log(`Transfer successful. Transfer ID: ${transfer.id}`);
+
+  
+          console.log(`Initiating payout of ${amount} CAD from Stripe account: ${user.stripeAccountId}`);
+          const payout = await stripe.payouts.create(
+              {
+                  amount: Math.round(amount * 100),
+                  currency: 'cad',
+              },
+              {
+                  stripeAccount: user.stripeAccountId, 
+              }
+          );
+          console.log(`Payout successful. Payout ID: ${payout.id}`);
+  
           const transaction = new BankingTransaction({
-            userId: user.id,
-            type: 'Withdrawal',
-            totalAmount: amount,
-            paymentMethod: 'Stripe',
-            status: 'Completed',
-            stripeTransferId: transfer.id, // Log Stripe transfer ID for traceability
+              userId: user.id,
+              type: 'Withdrawal',
+              totalAmount: amount,
+              paymentMethod: 'Stripe',
+              status: 'Completed',
+              stripeTransferId: transfer.id,
+              stripePayoutId: payout.id,
           });
-      
+  
           user.balance -= amount;
-      
-          // Save both the user balance update and the transaction record
+  
           await Promise.all([transaction.save(), user.save()]);
-      
+          console.log(`Withdrawal completed. New balance: ${user.balance}`);
+  
           return {
-            success: true,
-            message: 'Withdrawal successful',
-            newBalance: user.balance,
+              success: true,
+              message: 'Withdrawal successful',
+              newBalance: user.balance,
           };
-        } catch (error) {
-          console.error('Error processing withdrawal:', error.message, error.stack);
+      } catch (error) {
+          if (error.type === 'StripeInvalidRequestError') {
+              console.error('Invalid request to Stripe API:', error.message);
+          } else if (error.type === 'StripeCardError') {
+              console.error('Card error during transfer or payout:', error.message);
+          } else if (error.type === 'StripeAPIError') {
+              console.error('Stripe API error:', error.message);
+          } else if (error.type === 'StripeConnectionError') {
+              console.error('Network error with Stripe:', error.message);
+          } else {
+              console.error('Unknown error during withdrawal process:', error.message);
+          }
+  
+          // Provide a user-friendly error response
           throw new GraphQLError('Failed to process withdrawal. Please contact support if the issue persists.', {
-            extensions: { code: 'WITHDRAWAL_ERROR' },
+              extensions: { code: 'WITHDRAWAL_ERROR', details: error.message },
           });
-        }
-    },
+      }
+  },
 
     createStripeAccountLink: async (_, { userId }, context) => {
         console.log("started creating stripe account link for user: ", userId);
@@ -278,6 +278,7 @@ export const TransactionResolver = {
           }
 
           user.stripeAccountId = account.id;
+          user.isKycVerified = true ;
           await user.save();
       
           // Create a Stripe account link for onboarding

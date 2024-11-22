@@ -173,6 +173,7 @@ export const UserResolver = {
                     username: user.username,
                     balance: user.balance,
                     stripeAccountId: user.stripeAccountId,
+                    isKycVerified: user.isKycVerified,
                 },
                 token: token, // Return the same token
             };

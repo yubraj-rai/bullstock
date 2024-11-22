@@ -24,6 +24,8 @@ interface User {
   otp?: string; // Optional because it's not always required
   otpExpiry?: Date; // Optional because it's not always required
   stripeAccountId: string;
+  isKycVerified: Boolean ;
+  
 }
 
 interface StockUpdate {

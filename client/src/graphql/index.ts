@@ -10,6 +10,7 @@ export const LOGIN_USER = gql`
         updatedAt
         balance
         stripeAccountId
+        isKycVerified
       }
       token
     }
@@ -38,6 +39,7 @@ export const GET_USER = gql`
                 username
                 balance
                 stripeAccountId
+                isKycVerified
             }
             token
         }
