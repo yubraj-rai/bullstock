@@ -8,7 +8,9 @@ const UserSchema = new Schema({
     },
     password: {
         type: String,
-        required: true,
+	required: function () {
+           return !this.googleId;
+        },
     },
     createdAt: {
         type: Date,
@@ -38,7 +40,12 @@ const UserSchema = new Schema({
     stripeAccountId: {
         type: String,
         required: false,
-    }
+    },
+    isKycVerified: {
+        type: Boolean,
+        default: false,
+        required:false,
+    },
 });
 
 // Export the Mongoose model for the User schema

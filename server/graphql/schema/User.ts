@@ -10,6 +10,7 @@ export const UserTypeDef = `#graphql
         balance: Float!
         isVerified: Boolean!
         stripeAccountId: String
+        isKycVerified: Boolean!
     }
 
     type UserResponse {

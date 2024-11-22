@@ -40,7 +40,8 @@ const AccountPage = ({ refetchUser }: { refetchUser: () => Promise<any> }) => {
     const [transferAmount, setTransferAmount] = useState<number>(0);
     const [isLoadingDeposit, setIsLoadingDeposit] = useState(false);
     const [isLoadingWithDraw, setIsLoadingWithdraw] = useState(false);
-
+    const [kycStatus, setKycStatus] = useState<'verified' | 'not_verified'>('not_verified');
+    
     useEffect(() => {
         if (auth) {
             document.title = auth?.user?.username + ' | Bullstock';
@@ -48,60 +49,121 @@ const AccountPage = ({ refetchUser }: { refetchUser: () => Promise<any> }) => {
     }, [auth]);
 
     useEffect(() => {
-      if (auth?.user?._id) {
-          verifyPayment();
-      }
-  }, [auth?.user?._id]);
-
-
-  const verifyPayment = async () => {
-    try {
-        const pendingDepositStr = localStorage.getItem('pendingDeposit');
-        if (!pendingDepositStr) return;
-
-        const pendingDeposit = JSON.parse(pendingDepositStr);
-        const { sessionId, timestamp } = pendingDeposit;
-
-        // Check if the deposit has expired
-        const now = new Date().getTime();
-        const depositTime = new Date(timestamp).getTime();
-
-
-        if (now - depositTime > 60000) { // 1 hour
-            console.log('Deposit session expired.');
-            localStorage.removeItem('pendingDeposit');
-            setErrors('Deposit session expired. Please try again.');
-            return;
+        if (auth?.user?._id) {
+            verifyPayment();
+            checkKycStatus();
         }
+    }, [auth?.user?._id]);
 
-        // Call the GraphQL mutation to verify payment
-        const { data } = await verifyMutation({
-            variables: { userId: auth?.user?._id, sessionId },
-        });
 
-        
-        if (data?.verifyPayment?.success) {
-            console.log('Payment verification successful:', data.verifyPayment);
-            localStorage.removeItem('pendingDeposit');
-            dispatch({
-                type: UPDATE_BALANCE,
-                payload: { newBalance: data.verifyPayment.newBalance },
+    const checkKycStatus = async () => {
+        try {
+            const { data: refetchedData } = await refetchUser();
+            if (!refetchedData?.getUser) {
+                throw new Error('Failed to refetch user data');
+            }
+
+            const isVerified = refetchedData?.getUser?.user?.isKycVerified;
+            setKycStatus(isVerified ? 'verified' : 'not_verified');
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    console.error('Error checking KYC status:', err.message);
+                    setErrors('Failed to check KYC status. Please try again later.');
+                } else {
+                    console.error('Unknown error checking KYC status:', err);
+                    setErrors('An unknown error occurred. Please try again later.');
+            }
+        }
+    };
+                
+
+    const handleStripeKYCOnboarding = async () => {
+        try {
+            // Refetch user data to ensure we have the latest KYC and Stripe account details
+            const { data: refetchedData } = await refetchUser();
+            if (!refetchedData?.getUser) {
+                throw new Error('Failed to refetch user data');
+            }
+    
+            //  console.log('Refetched User Data:', refetchedData?.getUser);
+            //  console.log('Updated Stripe Account ID:', refetchedData?.getUser?.user?.stripeAccountId);
+            //  console.log('Updated KYC Status:', refetchedData?.getUser?.user?.isKycVerified);
+    
+            const isKycVerified = refetchedData?.getUser?.user?.isKycVerified;
+            const stripeAccountId = refetchedData?.getUser?.user?.stripeAccountId;
+
+            if (!stripeAccountId || !isKycVerified) {
+                console.log('User does not have a linked Stripe account. Initiating account creation...');
+                const { data } = await createStripeAccountLink({
+                    variables: { userId: refetchedData?.getUser?.user?._id },
+                });
+    
+                if (data?.createStripeAccountLink?.success) {
+                    console.log(
+                        'Stripe account successfully created and redirecting to Stripe onboarding:',
+                        data.createStripeAccountLink.stripeAccountId
+                    );
+                    window.location.href = data.createStripeAccountLink.url; 
+                    setKycStatus('verified');
+                } else {
+                    console.error('Error: Failed to create Stripe account link');
+                    throw new Error(data?.createStripeAccountLink?.message || 'Failed to create Stripe account link');
+                }
+            }
+
+            console.log('KYC already verified.');
+        } catch (error) {
+            console.error('Validation Error:', error);
+            throw error;
+        }
+    };
+
+    const verifyPayment = async () => {
+        try {
+            const pendingDepositStr = localStorage.getItem('pendingDeposit');
+            if (!pendingDepositStr) return;
+
+            const pendingDeposit = JSON.parse(pendingDepositStr);
+            const { sessionId, timestamp } = pendingDeposit;
+
+            // Check if the deposit has expired
+            const now = new Date().getTime();
+            const depositTime = new Date(timestamp).getTime();
+
+
+            if (now - depositTime > 60000) { // 1 hour
+                console.log('Deposit session expired.');
+                localStorage.removeItem('pendingDeposit');
+                setErrors('Deposit session expired. Please try again.');
+                return;
+            }
+
+            // Call the GraphQL mutation to verify payment
+            const { data } = await verifyMutation({
+                variables: { userId: auth?.user?._id, sessionId },
             });
-            navigate('/account');
-            setErrors('Deposit successful!');
-        } else {
-            console.error('Verification failed:', data?.verifyPayment?.message);
-            setErrors(data?.verifyPayment?.message || 'Failed to verify payment.');
+
+            
+            if (data?.verifyPayment?.success) {
+                console.log('Payment verification successful:', data.verifyPayment);
+                localStorage.removeItem('pendingDeposit');
+                dispatch({
+                    type: UPDATE_BALANCE,
+                    payload: { newBalance: data.verifyPayment.newBalance },
+                });
+                navigate('/account');
+                setErrors('Deposit successful!');
+            } else {
+                console.error('Verification failed:', data?.verifyPayment?.message);
+                setErrors(data?.verifyPayment?.message || 'Failed to verify payment.');
+            }
+        } catch (err) {
+            console.error('Error verifying payment:', err);
+            setErrors('Failed to verify payment status.');
         }
-    } catch (err) {
-        console.error('Error verifying payment:', err);
-        setErrors('Failed to verify payment status.');
     }
-  }
       
     const handleDeposit = async () => {
-
-        debugger ;
         if (transferAmount <= 0) {
           setErrors('Amount must be greater than 0');
           return;
@@ -141,8 +203,8 @@ const AccountPage = ({ refetchUser }: { refetchUser: () => Promise<any> }) => {
     };
       
 
-    const handleWithdraw = async () => {
-        debugger ;
+
+    const handleWithdraw = async () => {    
         if (transferAmount <= 0) {
             console.error('Error: Transfer amount must be greater than 0');
             setErrors('Amount must be greater than 0');
@@ -158,48 +220,11 @@ const AccountPage = ({ refetchUser }: { refetchUser: () => Promise<any> }) => {
         setErrors(null);
         setIsLoadingWithdraw(true);
     
-        console.log('Initiating withdrawal process...', auth);
-        console.log('Current User Balance:', auth?.user?.balance);
-        console.log('Requested Transfer Amount:', transferAmount);
-        console.log('Stripe Account ID:', auth?.user?.stripeAccountId);
+        // console.log('Initiating withdrawal process...', auth);
+        // console.log('Current User Balance:', auth?.user?.balance);
+        // console.log('Requested Transfer Amount:', transferAmount);
     
         try {
-            // Refetch user data to get the latest Stripe account ID and balance
-            const { data: refetchedData } = await refetchUser();
-            if (!refetchedData?.getUser) {
-                throw new Error('Failed to refetch user data');
-            }
-    
-            // Update the Redux store with the refetched user data
-            dispatch({ type: UPDATE_BALANCE, payload: { newBalance: refetchedData.getUser.balance } });
-    
-            // Debug logs
-            console.log('Refetched User Data:', refetchedData?.getUser);
-            console.log('Updated Stripe Account ID:', refetchedData?.getUser?.user?.stripeAccountId);
-    
-            // Check if the user has a linked Stripe account
-            if (!refetchedData?.getUser?.user?.stripeAccountId) {
-                console.log('User does not have a linked Stripe account. Initiating account creation...');
-    
-                const { data } = await createStripeAccountLink({
-                    variables: { userId: auth?.user?._id },
-                });
-    
-                if (data?.createStripeAccountLink?.success) {
-                    console.log(
-                        'Stripe account successfully created and redirecting to Stripe onboarding:',
-                        data.createStripeAccountLink.stripeAccountId
-                    );
-                    auth.user.stripeAccountId = data.createStripeAccountLink.stripeAccountId; // Update local auth
-                    window.location.href = data.createStripeAccountLink.url; // Redirect to Stripe onboarding
-                    return; // Exit withdrawal process until onboarding is complete
-                } else {
-                    console.error('Error: Failed to create Stripe account link');
-                    throw new Error(data?.createStripeAccountLink?.message || 'Failed to create Stripe account link');
-                }
-            }
-    
-            // Proceed with withdrawal
             console.log('Executing withdrawal mutation...');
             const { data: withdrawData } = await withdrawMutation({
                 variables: { amount: transferAmount },
@@ -230,7 +255,6 @@ const AccountPage = ({ refetchUser }: { refetchUser: () => Promise<any> }) => {
             setIsLoadingWithdraw(false);
         }
     };
-    
       
     const generatePDF = () => {
         const doc = new jsPDF();
@@ -387,9 +411,10 @@ const AccountPage = ({ refetchUser }: { refetchUser: () => Promise<any> }) => {
                                       Transactions
                                   </Tab>
                               </Tab.List>
-                              <Tab.Panels className='dark:bg-darkField bg-gray-100 rounded-2xl dark:text-white p-3 min-h-panel w-full'>
-                                 <Tab.Panel key={'Profile'} className={classNames('min-h-panel')}>
-                                    <div className='flex flex-col justify-center p-5'>
+                              <Tab.Panels className='dark:bg-darkField bg-gray-100 rounded-2xl dark:text-white p-3 w-full' style={{ minHeight: '700px' }}>
+
+                                 <Tab.Panel key={'Profile'} className={classNames('min-h-full')}>
+                                    <div className='flex flex-col justify-center p-5 h-full'>
                                         <section className='mx-auto pb-7 w-full flex-1 space-y-6'>
 
                                             {/* Balance Display */}
@@ -410,6 +435,26 @@ const AccountPage = ({ refetchUser }: { refetchUser: () => Promise<any> }) => {
                                                 </h3>
                                             </div>
 
+                                            {/* Customer KYC */}
+                                            <div className='bg-gradient-to-r from-[#f3f4f6] to-[#e5e7eb] dark:from-[#1f2937] dark:to-[#111827] p-6 rounded-lg shadow-md'>
+                                                <h2 className='text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-[#219cd7] to-[#6dbfdd] mb-3'>
+                                                    Customer KYC
+                                                </h2>
+                                                <div className='flex justify-left'>
+                                                    <button
+                                                        onClick={kycStatus === 'not_verified' ? handleStripeKYCOnboarding : undefined}
+                                                        disabled={kycStatus === 'verified'}
+                                                        className={`flex items-center max-h-16 text-white border-0 py-2 px-4 md:px-6 focus:outline-none transition-all rounded-full ${
+                                                            kycStatus === 'verified'
+                                                                ? 'bg-gradient-to-r from-[#219cd7] to-[#6dbfdd] cursor-not-allowed'
+                                                                : 'bg-gradient-to-r from-[#db6b61] to-[#ff8b81] hover:shadow-lg hover:scale-105'
+                                                        }`}
+                                                    >
+                                                        {kycStatus === 'verified' ? 'KYC Verified' : 'Verify KYC'}
+                                                    </button>
+                                                </div>
+                                            </div>
+
                                             {/* Amount Selection */}
                                             <div className='bg-gradient-to-r from-[#f3f4f6] to-[#e5e7eb] dark:from-[#1f2937] dark:to-[#111827] p-6 rounded-lg shadow-md space-y-6'>
                                                 <h2 className='text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-[#219cd7] to-[#6dbfdd] text-left mb-3'>
@@ -419,7 +464,7 @@ const AccountPage = ({ refetchUser }: { refetchUser: () => Promise<any> }) => {
                                                 {/* Quick Select Buttons */}
                                                 <div className='flex justify-between items-center mb-4'>
                                                     {/* Deposit Amount Buttons (Align with Input Field) */}
-                                                    <div className='flex space-x-2 md:space-x-5' style={{ marginLeft: '2.5rem' }}>
+                                                    <div className='flex space-x-2 md:space-x-5' >
                                                         {transferOptions.map((option, i) => (
                                                             <button
                                                                 key={i}
@@ -484,29 +529,36 @@ const AccountPage = ({ refetchUser }: { refetchUser: () => Promise<any> }) => {
                                                     className='w-full flex justify-center px-6 py-3 text-white font-semibold bg-gradient-to-r from-[#219cd7] to-[#6dbfdd] rounded-full hover:shadow-lg hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#219cd7]/50'>
                                                     {isLoadingDeposit && !errors ? 'Processing...' : 'Deposit'}
                                                 </button>
+                                               {/* Withdraw Button */}
                                                 <button
                                                     onClick={handleWithdraw}
-                                                    disabled={transferAmount > auth?.user?.balance || isLoadingWithDraw || isLoadingDeposit}
+                                                    disabled={
+                                                        kycStatus === 'not_verified' || // Disable if KYC is not verified
+                                                        transferAmount > auth?.user?.balance || 
+                                                        isLoadingWithDraw || 
+                                                        isLoadingDeposit
+                                                    }
                                                     className={classNames(
-                                                        transferAmount > auth?.user?.balance
+                                                        kycStatus === 'not_verified'
+                                                            ? 'cursor-not-allowed bg-gray-400'
+                                                            : transferAmount > auth?.user?.balance
                                                             ? 'cursor-not-allowed bg-gray-400'
                                                             : 'bg-gradient-to-r from-[#db6b61] to-[#ff8b81] hover:shadow-lg hover:scale-105 transition-all duration-200 focus:ring-2 focus:ring-[#db6b61]/50',
                                                         'w-full flex justify-center px-6 py-3 text-white font-semibold rounded-full focus:outline-none'
-                                                    )}>
+                                                    )}
+                                                >
                                                     {isLoadingWithDraw && !errors ? 'Processing...' : 'Withdraw'}
                                                 </button>
-                                            </div>
+
+                                              </div>
                                         </section>
                                     </div>
                                 </Tab.Panel>
-                                <Tab.Panel key={'Transactions'} className={classNames('h-full overflow-auto')}>
-                                  <div className='flex h-full min-w-panel'>
+                                <Tab.Panel key={'Profile'} className={classNames('min-h-full')}>
+                                <div className='flex flex-col justify-center p-5 h-full'>
+                                {/* <Tab.Panel key={'Transactions'} className={classNames('h-full overflow-auto')}>
+                                  <div className='flex h-full min-w-panel'> */}
                                       <div className='text-xs overflow-auto h-panel w-full'>
-                                          {/* Header */}
-                                          {/* <h2 className='text-left text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-[#219cd7] to-[#6dbfdd] mb-4 px-4 py-2'>
-                                              Transactions - {transactions && transactions.length} Latest Records
-                                          </h2> */}
-
                                           <h2 className='text-left text-lg font-semibold text-gray-700 capitalize dark:text-gray-200 mb-2 px-3 pt-2 flex justify-between items-center'>
                                                 <span>Transactions - {transactions && transactions.length} latest records</span>
                                                 <button 
