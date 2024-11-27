@@ -21,10 +21,7 @@ export const UserResolver = {
     Mutation: {
         registerUser: async (_, { username, password, confirmPassword }) => {
             const { valid, errors } = validateRegisterInput(username, password, confirmPassword);
-      
-            console.log(username) ;
-            console.log(password) ;
-            console.log(confirmPassword) ;
+     
             if (!valid) {
               throw new GraphQLError(errors, {
                 extensions: {
