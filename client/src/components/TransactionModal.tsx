@@ -218,9 +218,9 @@ export default function TransactionModal({ id, isHidden, toggle, ticker, exchang
                                                 placeholder='0'
                                             />
                                             <span
-                                                // onClick={() => {
-                                                //     setShares((shares) => shares + 1);
-                                                // }}
+                                                 onClick={() => {
+                                                     setShares((shares) => shares + 1);
+                                                 }}
                                                 onMouseDown={() => {
                                                     holdIncrementShares();
                                                 }}
