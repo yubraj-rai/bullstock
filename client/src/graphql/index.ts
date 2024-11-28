@@ -1,17 +1,22 @@
 import { gql } from '@apollo/client';
 
-export const LOGIN_USER = gql(`
-    mutation LoginUser($username: String!, $password: String!) {
-        loginUser(username: $username, password: $password) {
-            user {
-                _id
-                balance
-                username
-            }
-            token
-        }
+export const LOGIN_USER = gql`
+  mutation LoginUser($username: String!, $password: String!) {
+    loginUser(username: $username, password: $password) {
+      user {
+        _id
+        username
+        createdAt
+        updatedAt
+        balance
+        stripeAccountId
+        isKycVerified
+      }
+      token
     }
-`);
+  }
+`;
+
 export const GET_TRANSACTIONS = gql(`
   query GetTransactions {
       transactions {
@@ -25,20 +30,74 @@ export const GET_TRANSACTIONS = gql(`
       }
   }
 `);
-export const DEPOSIT = gql(`
+
+export const GET_USER = gql`
+    query GetUser {
+        getUser {
+            user {
+                _id
+                username
+                balance
+                stripeAccountId
+                isKycVerified
+            }
+            token
+        }
+    }
+`;
+
+
+export const CREATE_STRIPE_SESSION = gql`
+  mutation CreateStripeSession($amount: Float!) {
+    createStripeSession(amount: $amount) {
+      sessionId
+      url
+    }
+  }
+`;
+
+export const DEPOSIT = gql`
   mutation Deposit($amount: Float!) {
-      deposit(amount: $amount) {
-          newBalance
-      }
+    deposit(amount: $amount) {
+      success
+      message
+      newBalance
+    }
   }
-`);
-export const WITHDRAW = gql(`
+`;
+
+export const WITHDRAW = gql`
   mutation Withdraw($amount: Float!) {
-      withdraw(amount: $amount) {
-          newBalance
-      }
+    withdraw(amount: $amount) {
+      success
+      message
+      newBalance
+    }
   }
-`);
+`;
+
+export const CREATE_STRIPE_ACCOUNT_LINK = gql`
+  mutation CreateStripeAccountLink($userId: String!) {
+    createStripeAccountLink(userId: $userId) {
+      success
+      url
+      stripeAccountId
+    }
+  }
+`;
+
+
+export const VERIFY_PAYMENT = gql`
+  mutation VerifyPayment($userId: String!, $sessionId: String!) {
+    verifyPayment(userId: $userId, sessionId: $sessionId) {
+      success
+      message
+      amount
+      newBalance
+    }
+  }
+`;
+
 
 export const REGISTER_USER = gql(`
     mutation RegisterUser($username: String!, $password: String!, $confirmPassword: String!) {
@@ -53,27 +112,6 @@ export const REGISTER_USER = gql(`
     }
 `);
 
-export const VERIFY_USER = gql(`
-    query GetUser {
-        getUser {
-            user {
-                _id
-                username
-                balance
-            }
-            token
-        }
-    }
-`);
-
-
-export const CHANGE_USERNAME = gql(`
-    mutation ChangeUsername($newUsername: String!, $confirmPassword: String!) {
-        changeUsername(newUsername: $newUsername, confirmPassword: $confirmPassword) {
-            newUsername
-        }
-    }
-`);
 
 export const SEND_OTP = gql(`
   mutation SendOtp($username: String!) {
@@ -84,12 +122,6 @@ export const SEND_OTP = gql(`
 export const VERIFY_OTP = gql(`
   mutation VerifyOtp($username: String!, $otp: String!) {
     verifyOtp(username: $username, otp: $otp)
-  }
-`);
-
-export const RESET_PASSWORD = gql(`
-  mutation ResetPassword($username: String!, $password: String!) {
-    resetPassword(username: $username, password: $password)
   }
 `);
 
@@ -153,6 +185,8 @@ export const BUY_STOCK = gql(`
               ticker
               shares
               initialInvestment
+              logo
+              price
           }
           newBalance
       }
@@ -191,10 +225,9 @@ export const GET_STOCK = gql(`
   }
 `);
 
-
 export const GET_MARKET_NEWS = gql`
-    query {
-        getMarketNews {
+    query GetMarketNews($limit: Int!, $offset: Int!) {
+        getMarketNews(limit: $limit, offset: $offset) {
             title
             description
             url

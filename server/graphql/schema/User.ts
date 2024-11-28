@@ -9,10 +9,11 @@ export const UserTypeDef = `#graphql
         updatedAt: Date!
         balance: Float!
         isVerified: Boolean!
-        verificationToken: String!
+        stripeAccountId: String
+        isKycVerified: Boolean!
     }
 
-        type UserResponse {
+    type UserResponse {
         user: User
         token: String
     }
@@ -21,20 +22,9 @@ export const UserTypeDef = `#graphql
         getUser: UserResponse!
     }
 
-    type balanceResponse {
-        newBalance: Float!
-    }
-
-    type usernameChangeResponse {
-        newUsername: String!
-    }
-
     type Mutation {
         registerUser(username: String!, password: String!, confirmPassword: String!): UserResponse!
         loginUser(username: String!, password: String!): UserResponse!
-        deposit(amount: Float!): balanceResponse!
-        withdraw(amount: Float!): balanceResponse!
-        changeUsername(newUsername: String!, confirmPassword: String!): usernameChangeResponse!
         googleLogin(googleToken: String!): UserResponse
         sendOtp(username: String!): String
         verifyOtp(username: String!, otp: String!): String

@@ -1,17 +1,51 @@
 export const TransactionTypeDef = `#graphql
-    scalar Date
-    type Transaction {
-        userId: String!
-        type: String!
-        ticker: String!
-        shares: Int!
-        totalAmount: Float!
-        stockPrice: Float!
-        date: Date!
-        paymentMethod: String!
-    }
+  scalar Date
 
-    type Query {
-        transactions: [Transaction!]!
-    }
+  type Transaction {
+    userId: String!
+    type: String!
+    ticker: String
+    shares: Int
+    totalAmount: Float!
+    stockPrice: Float
+    date: Date!
+    paymentMethod: String!
+  }
+
+  type CreateStripeSessionResponse {
+    sessionId: String!
+    url: String!
+  }
+
+  type TransactionResponse {
+    success: Boolean!
+    message: String
+    newBalance: Float
+  }
+
+  type StripeAccountLinkResponse {
+    success: Boolean!
+    url: String
+    stripeAccountId: String
+  }
+
+  type PaymentVerificationResponse {
+    success: Boolean!
+    message: String!
+    amount: Float # Add this field if it's missing
+    newBalance: Float!
+  }
+
+  extend type Query {
+    transactions: [Transaction!]!
+  }
+
+  extend type Mutation {
+    createStripeSession(amount: Float!): CreateStripeSessionResponse
+    deposit(amount: Float!): TransactionResponse!
+    withdraw(amount: Float!): TransactionResponse!
+    createStripeAccountLink(userId: String!): StripeAccountLinkResponse!
+    verifyPayment(userId: String!, sessionId: String!): PaymentVerificationResponse!
+  }
 `;
+

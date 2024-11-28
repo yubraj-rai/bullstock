@@ -1,62 +1,45 @@
+// React and Router
+import { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
-import Footer from './components/Footer';
+
+// Apollo Client
+import { useLazyQuery, useQuery } from '@apollo/client';
+
+// Redux
+import { useDispatch } from 'react-redux';
+import { AUTH, OWNED_STOCKS } from './redux/actions';
+
+// GraphQL Queries
+import { GET_OWNEDSTOCKS, GET_USER } from './graphql';
+
+// Components
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
-import './index.css';
-import { AnimatePresence } from 'framer-motion';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// Pages
 import AuthPage from './pages/AuthPage';
 import ForgetPasswordPage from './pages/ForgetPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import VerifyOtpPage from './pages/VerifyOtpPage';
-// import { GoogleOAuthProvider } from '@react-oauth/google';
 import HomePage from './pages/HomePage';
 import MarketPage from './pages/MarketPage';
-import { useLazyQuery } from '@apollo/client';
-import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { VERIFY_USER, GET_OWNEDSTOCKS } from './graphql';
-import { AUTH, OWNED_STOCKS } from './redux/actions';
 import StockPage from './pages/StockPage';
-import socket from './socket';
-import axios from 'axios';
-// import Stripe from 'react-stripe-checkout';
 import NewsPage from './pages/NewsPage';
 import AccountPage from './pages/AccountPage';
 import PortfolioPage from './pages/PortfolioPage';
-import ProtectedRoute from './components/ProtectedRoute';
 
+// Other
+import { AnimatePresence } from 'framer-motion';
+import socket from './socket';
+import './index.css';
 
 function App() {
     const [getOwnedStocks, { data: ownedStocksData, loading: ownedStockLoading }] = useLazyQuery(GET_OWNEDSTOCKS);
-    const [verifyUser, { data: userData, loading: userLoading }] = useLazyQuery(VERIFY_USER);
+    const { data: userData, loading: userLoading, refetch: refetchUser } = useQuery(GET_USER);
     const dispatch = useDispatch();
     const location = useLocation();
-
-    // const handleToken = (totalAmount, token) => {
-    //     try {
-    //         axios.post("http://localhost:5000/api/stripe/pay", {
-    //             token: token.id,
-    //             amount: totalAmount
-    //         });
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // };
-
-    // const tokenHandler = (token) => {
-    //     handleToken(1000, token); 
-    // };
-    // useEffect(() => {
-    //     // Check for stored profile on app initialization
-    //     const profile = localStorage.getItem('profile');
-    //     if (profile) {
-    //         dispatch({ type: AUTH, payload: JSON.parse(profile) });
-    //     }
-    // }, [dispatch]);
-
-    useEffect(() => {
-        verifyUser();
-    }, [verifyUser]);
 
     useEffect(() => {
         if (userData && !userLoading) {
@@ -119,18 +102,11 @@ function App() {
                         path='/account'
                         element={
                             <ProtectedRoute>
-                                <AccountPage />
+                                <AccountPage refetchUser={refetchUser} />
                             </ProtectedRoute>
                         }
                     />
                 </Routes>
-
-                {/* <div>
-                    <Stripe
-                        stripeKey="pk_test_51QFejRD5fVcCMFTPPfY3M1VyzywDA0fTQfKOgPsaNcAx5L9m7lpxFZs3uAewxthsSs28vDPn2lpXEcb7EFwFqBLb00sKLbu0LO"
-                        token={tokenHandler}
-                    />
-                </div> */}
 
                 {location.pathname !== '/news' && <Footer />}
             </ScrollToTop>

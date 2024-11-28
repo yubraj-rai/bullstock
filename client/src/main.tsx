@@ -18,19 +18,36 @@ const httpLink = createHttpLink({
     uri: `${import.meta.env.VITE_API_URI || ''}/graphql`,
 });
 
+// const authLink = setContext((_, { headers }) => {
+//     const profile = localStorage.getItem('profile');
+//     const token = profile ? JSON.parse(profile).token : '';
+
+//     // Debug log for the token
+//     console.log('Token being set in headers:', token);
+
+//     return {
+//         headers: {
+//             ...headers,
+//             authorization: token ? `Bearer ${token}` : '',
+//         },
+//     };
+// });
+
 const authLink = setContext((_, { headers }) => {
-    // Get the authentication token from local storage if it exists
     const profile = localStorage.getItem('profile');
     const token = profile ? JSON.parse(profile).token : '';
-    
-    // Return the headers to the context so httpLink can read them
+
+    // Avoid double "Bearer" prefix
+    const authorizationHeader = token.startsWith('Bearer') ? token : `Bearer ${token}`;
+
     return {
         headers: {
             ...headers,
-            authorization: token ? `Bearer ${token}` : '',
+            authorization: token ? authorizationHeader : '',
         },
     };
 });
+
 
 const client = new ApolloClient({
     link: authLink.concat(httpLink),

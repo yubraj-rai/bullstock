@@ -39,6 +39,10 @@ export default function TransactionModal({ id, isHidden, toggle, ticker, exchang
         incrementTimer.current = setInterval(() => setShares((prev) => prev + 1), 150);
     };
 
+    const holdDecrementShares = () => {        
+        incrementTimer.current = setShares((shares) => Math.max(shares - 1, 0));
+    };
+
     // const holdDecrementShares = () => {
     //     if (shares !== 0) {
     //         incrementTimer.current = setInterval(
@@ -50,10 +54,6 @@ export default function TransactionModal({ id, isHidden, toggle, ticker, exchang
     //         );
     //     }
     // };
-
-    const holdDecrementShares = () => {        
-        incrementTimer.current = setShares((shares) => Math.max(shares - 1, 0));
-    };
 
     const clearIncrementTimer = () => {
         clearInterval(incrementTimer.current);
